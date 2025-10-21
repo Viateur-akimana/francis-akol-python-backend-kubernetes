@@ -1,6 +1,7 @@
 """Configuration settings for User Service."""
 
 from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

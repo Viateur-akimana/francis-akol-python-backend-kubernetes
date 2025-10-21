@@ -1,9 +1,10 @@
 """Logging configuration for User Service."""
 
-import sys
 import logging
-from loguru import logger
+import sys
+
 from app.core.config import settings
+from loguru import logger
 
 
 class InterceptHandler(logging.Handler):

@@ -1,13 +1,13 @@
 """User Service - Main FastAPI Application."""
 
 from contextlib import asynccontextmanager
+
+from app.core.config import settings
+from app.core.logging import setup_logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from prometheus_fastapi_instrumentator import Instrumentator
-
-from app.core.config import settings
-from app.core.logging import setup_logging
 
 # Setup logging
 logger = setup_logging()

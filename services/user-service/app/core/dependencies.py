@@ -1,12 +1,12 @@
 """FastAPI dependencies for dependency injection."""
 
 from typing import Generator, Optional
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.security import decode_token, verify_token_type
 from app.db.session import async_session
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 # Security scheme
