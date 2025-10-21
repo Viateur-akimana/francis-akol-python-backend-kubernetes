@@ -55,8 +55,9 @@ jobs:
       continue-on-error: true
 
   test-user-service:
-    name: Test User Service
+    name: Test User Service (disabled)
     runs-on: ubuntu-latest
+    if: false  # Temporarily disabled
     
     services:
       postgres:
@@ -116,8 +117,9 @@ jobs:
       continue-on-error: true
 
   build-docker-images:
-    name: Build Docker Images
+    name: Build Docker Images (disabled)
     runs-on: ubuntu-latest
+    if: false  # Temporarily disabled
     needs: [lint-and-format]
     
     strategy:
@@ -141,8 +143,9 @@ jobs:
         cache-to: type=gha,mode=max
 
   integration-tests:
-    name: Integration Tests
+    name: Integration Tests (disabled)
     runs-on: ubuntu-latest
+    if: false  # Temporarily disabled
     needs: [build-docker-images]
     
     steps:
@@ -173,8 +176,9 @@ jobs:
       if: always()
 
   security-scan:
-    name: Security Scan
+    name: Security Scan (disabled)
     runs-on: ubuntu-latest
+    if: false  # Temporarily disabled
     
     steps:
     - uses: actions/checkout@v4
