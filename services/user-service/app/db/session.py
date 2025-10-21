@@ -29,7 +29,7 @@ async_session = async_sessionmaker(
 async def get_db() -> AsyncSession:
     """
     Get database session.
-    
+
     Yields:
         AsyncSession: Database session
     """

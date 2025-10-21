@@ -28,24 +28,24 @@ async def get_db() -> Generator[AsyncSession, None, None]:
 
 
 async def get_current_user_id(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     """
     Dependency to get current authenticated user ID from JWT token.
-    
+
     Args:
         credentials: HTTP Authorization credentials
-    
+
     Returns:
         User ID from token
-    
+
     Raises:
         HTTPException: If token is invalid
     """
     token = credentials.credentials
     payload = decode_token(token)
     verify_token_type(payload, "access")
-    
+
     user_id: Optional[str] = payload.get("sub")
     if user_id is None:
         raise HTTPException(
@@ -53,29 +53,29 @@ async def get_current_user_id(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return user_id
 
 
 async def get_current_user_email(
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    credentials: HTTPAuthorizationCredentials = Depends(security),
 ) -> str:
     """
     Dependency to get current authenticated user email from JWT token.
-    
+
     Args:
         credentials: HTTP Authorization credentials
-    
+
     Returns:
         User email from token
-    
+
     Raises:
         HTTPException: If token is invalid
     """
     token = credentials.credentials
     payload = decode_token(token)
     verify_token_type(payload, "access")
-    
+
     email: Optional[str] = payload.get("email")
     if email is None:
         raise HTTPException(
@@ -83,34 +83,35 @@ async def get_current_user_email(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
+
     return email
 
 
 def require_role(allowed_roles: list[str]):
     """
     Dependency factory to check if user has required role.
-    
+
     Args:
         allowed_roles: List of allowed roles
-    
+
     Returns:
         Dependency function
     """
+
     async def role_checker(
-        credentials: HTTPAuthorizationCredentials = Depends(security)
+        credentials: HTTPAuthorizationCredentials = Depends(security),
     ) -> dict:
         token = credentials.credentials
         payload = decode_token(token)
         verify_token_type(payload, "access")
-        
+
         user_role: Optional[str] = payload.get("role")
         if user_role not in allowed_roles:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail=f"Insufficient permissions. Required roles: {', '.join(allowed_roles)}",
             )
-        
+
         return payload
-    
+
     return role_checker

@@ -35,7 +35,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     openapi_url="/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # CORS middleware
@@ -57,11 +57,7 @@ async def health_check():
     """Health check endpoint for container orchestration."""
     return JSONResponse(
         status_code=200,
-        content={
-            "status": "healthy",
-            "service": "user-service",
-            "version": "1.0.0"
-        }
+        content={"status": "healthy", "service": "user-service", "version": "1.0.0"},
     )
 
 
@@ -74,8 +70,8 @@ async def readiness_check():
         content={
             "status": "ready",
             "service": "user-service",
-            "database": "connected"  # TODO: actual check
-        }
+            "database": "connected",  # TODO: actual check
+        },
     )
 
 
@@ -86,7 +82,7 @@ async def root():
         "service": "User Service",
         "version": "1.0.0",
         "status": "running",
-        "docs": "/docs"
+        "docs": "/docs",
     }
 
 
@@ -98,9 +94,5 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(
-        "app.main:app",
-        host="0.0.0.0",
-        port=8001,
-        reload=settings.DEBUG
-    )
+
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8001, reload=settings.DEBUG)
