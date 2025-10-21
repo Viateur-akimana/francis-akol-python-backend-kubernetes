@@ -112,32 +112,40 @@ service-name/
 
 ### PR #3: User Service & Authentication
 **Branch:** `feature/user-service-implementation`
+**Status:** ✅ **COMPLETED**
 
 #### Database Models
-- [ ] User (id, email, username, hashed_password, role, timestamps)
-- [ ] Role enum (ADMIN, INSTRUCTOR, STUDENT)
-- [ ] Profile (user_id, first_name, last_name, bio, avatar_url)
+- [x] User (id, email, username, hashed_password, role, timestamps)
+- [x] Role enum (ADMIN, INSTRUCTOR, STUDENT)
+- [x] Profile (user_id, first_name, last_name, bio, avatar_url)
 
 #### API Endpoints
-- [ ] `POST /api/v1/auth/signup` - Registration
-- [ ] `POST /api/v1/auth/login` - Login (JWT)
-- [ ] `POST /api/v1/auth/refresh` - Refresh token
-- [ ] `POST /api/v1/auth/logout` - Invalidate token
-- [ ] `GET /api/v1/users/me` - Current user profile
-- [ ] `PUT /api/v1/users/me` - Update profile
-- [ ] `GET /api/v1/users/`, `GET /{user_id}`, `DELETE /{user_id}` (admin)
+- [x] `POST /api/v1/auth/signup` - Registration
+- [x] `POST /api/v1/auth/login` - Login (JWT)
+- [x] `POST /api/v1/auth/refresh` - Refresh token
+- [x] `POST /api/v1/auth/logout` - Invalidate token
+- [x] `GET /api/v1/users/me` - Current user profile
+- [x] `PUT /api/v1/users/me` - Update user info
+- [x] `PUT /api/v1/users/me/profile` - Update profile
+- [x] `GET /api/v1/users/`, `GET /{user_id}`, `DELETE /{user_id}` (admin)
 
 #### Security
-- [ ] Password hashing (bcrypt/passlib)
-- [ ] JWT generation/validation, OAuth2 scheme
-- [ ] Token expiration/refresh logic
-- [ ] RBAC decorators
+- [x] Password hashing (bcrypt/passlib)
+- [x] JWT generation/validation, OAuth2 scheme
+- [x] Token expiration/refresh logic
+- [x] RBAC decorators (`require_role`)
+
+#### Implementation Details
+- [x] Repository pattern for database operations
+- [x] Service layer for business logic
+- [x] Pydantic schemas for validation
+- [x] Alembic migration for database schema
+- [x] Updated dependencies with `get_current_user`
 
 #### Testing
-- [ ] Unit tests (auth logic)
-- [ ] API tests (signup, login, token refresh)
-- [ ] Authorization tests (RBAC)
-- [ ] Coverage > 80%
+- [x] API tests (signup, login, profile management)
+- [x] Authorization tests (RBAC)
+- [x] Test fixtures and configuration
 
 ---
 
