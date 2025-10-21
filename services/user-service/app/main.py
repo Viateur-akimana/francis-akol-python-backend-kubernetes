@@ -20,9 +20,9 @@ async def lifespan(app: FastAPI):
     logger.info("Starting User Service...")
     logger.info(f"Environment: {settings.ENVIRONMENT}")
     logger.info(f"Debug mode: {settings.DEBUG}")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down User Service...")
 

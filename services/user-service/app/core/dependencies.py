@@ -16,7 +16,7 @@ security = HTTPBearer()
 async def get_db() -> Generator[AsyncSession, None, None]:
     """
     Dependency to get database session.
-    
+
     Yields:
         AsyncSession: Database session
     """
