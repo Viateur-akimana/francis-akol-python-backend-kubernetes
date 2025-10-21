@@ -9,11 +9,11 @@
 ## 📋 SETUP & INITIALIZATION
 
 ### Repository Setup
-- [ ] Create private repo: `francis-akol-python-backend-assessment`
-- [ ] Add @gniyonge3 as collaborator (Write Access)
-- [ ] Initialize: README.md, .gitignore, LICENSE
-- [ ] Create branch structure: `main`, `development`, `feature/*`, `hotfix/*`
-- [ ] Set up project structure:
+- [x] Create private repo: `francis-akol-python-backend-assessment`
+- [x] Add @gniyonge3 as collaborator (Write Access)
+- [x] Initialize: README.md, .gitignore, LICENSE
+- [x] Create branch structure: `main`, `development`, `feature/*`, `hotfix/*`
+- [x] Set up project structure:
   ```
   ├── services/{user,course,enrollment,payment}-service/
   ├── docs/{architecture,api-specs}/
@@ -28,31 +28,31 @@
 **PR #1:** `feature/milestone-1-architecture-design`
 
 ### Analysis & Design
-- [ ] Document monolith pain points and service boundaries
-- [ ] Define data ownership per service (User, Course, Enrollment, Payment)
-- [ ] Map service dependencies and communication patterns
+- [x] Document monolith pain points and service boundaries
+- [x] Define data ownership per service (User, Course, Enrollment, Payment)
+- [x] Map service dependencies and communication patterns
 
 ### High-Level Design (HLD)
-- [ ] System context diagram (C4 model)
-- [ ] Microservices architecture diagram
-- [ ] Service communication design (REST/gRPC)
-- [ ] Data flow diagrams
-- [ ] Database strategy (PostgreSQL + MongoDB + Redis)
+- [x] System context diagram (C4 model)
+- [x] Microservices architecture diagram
+- [x] Service communication design (REST/gRPC)
+- [x] Data flow diagrams
+- [x] Database strategy (PostgreSQL + MongoDB + Redis)
 
 ### Low-Level Design (LLD)
-- [ ] Sequence diagrams (signup→JWT, course creation, enrollment, payment)
-- [ ] Class diagrams per service
-- [ ] Database schemas (tables, collections, indexes)
-- [ ] API contracts (OpenAPI/Swagger specs)
-- [ ] Async messaging architecture (Celery + Redis)
+- [x] Sequence diagrams (signup→JWT, course creation, enrollment, payment)
+- [x] Class diagrams per service
+- [x] Database schemas (tables, collections, indexes)
+- [x] API contracts (OpenAPI/Swagger specs)
+- [x] Async messaging architecture (Celery + Redis)
 
 ### Documentation Deliverables
-- [ ] `/docs/architecture/HLD.pdf` (diagrams)
-- [ ] `/docs/architecture/LLD.pdf` 
-- [ ] `/docs/architecture/service-boundaries.md`
-- [ ] `/docs/architecture/database-design.md`
-- [ ] `/docs/architecture/tech-stack.md`
-- [ ] Update root README with architecture overview
+- [x] `/docs/architecture/HLD.pdf` (diagrams)
+- [x] `/docs/architecture/LLD.pdf` 
+- [x] `/docs/architecture/service-boundaries.md`
+- [x] `/docs/architecture/database-design.md`
+- [x] `/docs/architecture/tech-stack.md`
+- [x] Update root README with architecture overview
 
 ---
 
@@ -60,19 +60,19 @@
 **PR #2:** `feature/milestone-2-infrastructure`
 
 ### Development Environment
-- [ ] `.env.example` with all environment variables
-- [ ] `requirements.txt` or `pyproject.toml` (Poetry)
-- [ ] Virtual environment setup documentation
+- [x] `.env.example` with all environment variables
+- [x] `requirements.txt` or `pyproject.toml` (Poetry)
+- [x] Virtual environment setup documentation
 
 ### Docker Infrastructure
-- [ ] Base Dockerfile for Python services
-- [ ] Service-specific Dockerfiles (user, course, enrollment, payment)
-- [ ] `docker-compose.yml`:
+- [x] Base Dockerfile for Python services
+- [x] Service-specific Dockerfiles (user, course, enrollment, payment)
+- [x] `docker-compose.yml`:
   - PostgreSQL, MongoDB, Redis
   - RabbitMQ/Redis (Celery broker)
   - All 4 microservices
   - Prometheus + Grafana
-- [ ] Test full stack startup
+- [x] Test full stack startup
 
 ### FastAPI Scaffolding (Per Service)
 ```
@@ -87,20 +87,20 @@ service-name/
 ├── requirements.txt
 └── Dockerfile
 ```
-- [ ] User Service scaffold
-- [ ] Course Service scaffold
-- [ ] Enrollment Service scaffold
-- [ ] Payment Service scaffold
-- [ ] Health check endpoints (`/health`, `/ready`)
+- [x] User Service scaffold
+- [x] Course Service scaffold
+- [x] Enrollment Service scaffold
+- [x] Payment Service scaffold
+- [x] Health check endpoints (`/health`, `/ready`)
 
 ### Database Setup
-- [ ] PostgreSQL: Connection pooling (SQLAlchemy), per-service schemas
-- [ ] Alembic migrations per service
-- [ ] MongoDB: Motor for async, collections + indexes
-- [ ] Redis: Connection, cache TTL, Celery broker config
+- [x] PostgreSQL: Connection pooling (SQLAlchemy), per-service schemas
+- [x] Alembic migrations per service
+- [x] MongoDB: Motor for async, collections + indexes
+- [x] Redis: Connection, cache TTL, Celery broker config
 
 ### GitHub Actions CI (Basic)
-- [ ] `.github/workflows/ci.yml`:
+- [x] `.github/workflows/ci.yml`:
   - Lint (flake8, pylint), format check (black, isort)
   - Type check (mypy)
   - Run tests, generate coverage
