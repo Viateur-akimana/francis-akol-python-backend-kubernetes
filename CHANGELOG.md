@@ -1,0 +1,631 @@
+# Modular Learning Hub (MLH) - Development Changelog
+
+**Project:** Francis Akol Python Backend Assessment  
+**Timeline:** Oct 20-22, 2025 | **Review:** Oct 23, 2025  
+**Collaborator:** @gniyonge3
+
+---
+
+## 📋 SETUP & INITIALIZATION
+
+### Repository Setup
+- [ ] Create private repo: `francis-akol-python-backend-assessment`
+- [ ] Add @gniyonge3 as collaborator (Write Access)
+- [ ] Initialize: README.md, .gitignore, LICENSE
+- [ ] Create branch structure: `main`, `development`, `feature/*`, `hotfix/*`
+- [ ] Set up project structure:
+  ```
+  ├── services/{user,course,enrollment,payment}-service/
+  ├── docs/{architecture,api-specs}/
+  ├── tests/
+  ├── docker/, k8s/
+  └── .github/workflows/
+  ```
+
+---
+
+## 🎯 MILESTONE 1: ARCHITECTURE & DESIGN
+**PR #1:** `feature/milestone-1-architecture-design`
+
+### Analysis & Design
+- [ ] Document monolith pain points and service boundaries
+- [ ] Define data ownership per service (User, Course, Enrollment, Payment)
+- [ ] Map service dependencies and communication patterns
+
+### High-Level Design (HLD)
+- [ ] System context diagram (C4 model)
+- [ ] Microservices architecture diagram
+- [ ] Service communication design (REST/gRPC)
+- [ ] Data flow diagrams
+- [ ] Database strategy (PostgreSQL + MongoDB + Redis)
+
+### Low-Level Design (LLD)
+- [ ] Sequence diagrams (signup→JWT, course creation, enrollment, payment)
+- [ ] Class diagrams per service
+- [ ] Database schemas (tables, collections, indexes)
+- [ ] API contracts (OpenAPI/Swagger specs)
+- [ ] Async messaging architecture (Celery + Redis)
+
+### Documentation Deliverables
+- [ ] `/docs/architecture/HLD.pdf` (diagrams)
+- [ ] `/docs/architecture/LLD.pdf` 
+- [ ] `/docs/architecture/service-boundaries.md`
+- [ ] `/docs/architecture/database-design.md`
+- [ ] `/docs/architecture/tech-stack.md`
+- [ ] Update root README with architecture overview
+
+---
+
+## 🏗️ MILESTONE 2: INFRASTRUCTURE SETUP
+**PR #2:** `feature/milestone-2-infrastructure`
+
+### Development Environment
+- [ ] `.env.example` with all environment variables
+- [ ] `requirements.txt` or `pyproject.toml` (Poetry)
+- [ ] Virtual environment setup documentation
+
+### Docker Infrastructure
+- [ ] Base Dockerfile for Python services
+- [ ] Service-specific Dockerfiles (user, course, enrollment, payment)
+- [ ] `docker-compose.yml`:
+  - PostgreSQL, MongoDB, Redis
+  - RabbitMQ/Redis (Celery broker)
+  - All 4 microservices
+  - Prometheus + Grafana
+- [ ] Test full stack startup
+
+### FastAPI Scaffolding (Per Service)
+```
+service-name/
+├── app/
+│   ├── main.py
+│   ├── api/v1/endpoints/
+│   ├── core/{config,security,dependencies}.py
+│   ├── models/, schemas/, services/, repositories/
+│   └── db/
+├── tests/
+├── requirements.txt
+└── Dockerfile
+```
+- [ ] User Service scaffold
+- [ ] Course Service scaffold
+- [ ] Enrollment Service scaffold
+- [ ] Payment Service scaffold
+- [ ] Health check endpoints (`/health`, `/ready`)
+
+### Database Setup
+- [ ] PostgreSQL: Connection pooling (SQLAlchemy), per-service schemas
+- [ ] Alembic migrations per service
+- [ ] MongoDB: Motor for async, collections + indexes
+- [ ] Redis: Connection, cache TTL, Celery broker config
+
+### GitHub Actions CI (Basic)
+- [ ] `.github/workflows/ci.yml`:
+  - Lint (flake8, pylint), format check (black, isort)
+  - Type check (mypy)
+  - Run tests, generate coverage
+- [ ] Add CI + coverage badges to README
+
+---
+
+## 🚀 MILESTONE 3: SERVICE IMPLEMENTATION
+
+### PR #3: User Service & Authentication
+**Branch:** `feature/user-service-implementation`
+
+#### Database Models
+- [ ] User (id, email, username, hashed_password, role, timestamps)
+- [ ] Role enum (ADMIN, INSTRUCTOR, STUDENT)
+- [ ] Profile (user_id, first_name, last_name, bio, avatar_url)
+
+#### API Endpoints
+- [ ] `POST /api/v1/auth/signup` - Registration
+- [ ] `POST /api/v1/auth/login` - Login (JWT)
+- [ ] `POST /api/v1/auth/refresh` - Refresh token
+- [ ] `POST /api/v1/auth/logout` - Invalidate token
+- [ ] `GET /api/v1/users/me` - Current user profile
+- [ ] `PUT /api/v1/users/me` - Update profile
+- [ ] `GET /api/v1/users/`, `GET /{user_id}`, `DELETE /{user_id}` (admin)
+
+#### Security
+- [ ] Password hashing (bcrypt/passlib)
+- [ ] JWT generation/validation, OAuth2 scheme
+- [ ] Token expiration/refresh logic
+- [ ] RBAC decorators
+
+#### Testing
+- [ ] Unit tests (auth logic)
+- [ ] API tests (signup, login, token refresh)
+- [ ] Authorization tests (RBAC)
+- [ ] Coverage > 80%
+
+---
+
+### PR #4: Course Service with Caching
+**Branch:** `feature/course-service-implementation`
+
+#### Database Models
+- [ ] Course (id, title, description, instructor_id, price, max_students, timestamps)
+- [ ] CourseContent (id, course_id, title, content_type, content_url, order)
+- [ ] Category (id, name, description)
+
+#### API Endpoints
+- [ ] `POST /api/v1/courses/` - Create (instructor)
+- [ ] `GET /api/v1/courses/` - List (paginated, filtered, sorted)
+- [ ] `GET /api/v1/courses/{id}` - Details (cached)
+- [ ] `PUT /api/v1/courses/{id}`, `DELETE /api/v1/courses/{id}`
+- [ ] `POST /api/v1/courses/{id}/content`, `GET /api/v1/courses/{id}/content`
+- [ ] `GET /api/v1/categories/`
+
+#### Redis Caching
+- [ ] Cache course details (TTL: 5-10 min)
+- [ ] Cache course list with filters
+- [ ] Cache invalidation on updates
+- [ ] Cache-aside pattern
+- [ ] Cache hit/miss metrics
+
+#### Database Optimization
+- [ ] Indexes (instructor_id, category_id, created_at)
+- [ ] Full-text search (title/description)
+- [ ] Connection pooling
+
+#### Testing
+- [ ] Unit + API tests
+- [ ] Redis caching tests (hit/miss, invalidation)
+- [ ] Pagination tests
+- [ ] Coverage > 80%
+
+---
+
+### PR #5: Enrollment Service with Async Processing
+**Branch:** `feature/enrollment-service-implementation`
+
+#### Database Models
+- [ ] Enrollment (id, user_id, course_id, status, enrolled_at, completed_at)
+- [ ] EnrollmentStatus enum (PENDING, ACTIVE, COMPLETED, CANCELLED)
+
+#### API Endpoints
+- [ ] `POST /api/v1/enrollments/` - Enroll (check quota)
+- [ ] `GET /api/v1/enrollments/` - List user enrollments
+- [ ] `GET /api/v1/enrollments/{id}`, `PUT /{id}`, `DELETE /{id}`
+- [ ] `GET /api/v1/courses/{course_id}/enrollments` (instructor)
+
+#### Business Logic
+- [ ] Check course quota (max_students)
+- [ ] Prevent duplicate enrollments
+- [ ] Check payment status
+- [ ] Validate user eligibility
+
+#### Celery Tasks
+- [ ] `send_enrollment_confirmation_email`
+- [ ] `notify_instructor`
+- [ ] `update_course_statistics`
+- [ ] Retry logic with exponential backoff
+
+#### Inter-Service Communication
+- [ ] HTTP client to Course Service (verify, check quota)
+- [ ] HTTP client to User Service (verify user)
+- [ ] HTTP client to Payment Service (verify payment)
+- [ ] Circuit breaker pattern, timeouts
+
+#### Testing
+- [ ] Unit + API tests
+- [ ] Quota enforcement tests
+- [ ] Celery task tests (mocked)
+- [ ] Inter-service tests (mocked)
+- [ ] Rollback scenarios
+- [ ] Coverage > 80%
+
+---
+
+### PR #6: Payment Service with Transactions
+**Branch:** `feature/payment-service-implementation`
+
+#### Database Models
+- [ ] Payment (id, user_id, course_id, amount, currency, status, payment_method, transaction_id, timestamp)
+- [ ] PaymentStatus enum (PENDING, COMPLETED, FAILED, REFUNDED)
+
+#### API Endpoints
+- [ ] `POST /api/v1/payments/` - Create intent
+- [ ] `POST /api/v1/payments/{id}/confirm` - Confirm
+- [ ] `GET /api/v1/payments/`, `GET /{id}`
+- [ ] `POST /api/v1/payments/{id}/refund` (admin)
+- [ ] `GET /api/v1/payments/analytics` (admin)
+
+#### Payment Processing
+- [ ] Mock payment gateway (Stripe-like)
+- [ ] Validation, transaction ID generation
+- [ ] Idempotency key handling
+- [ ] Webhook handler
+
+#### Transaction Management
+- [ ] Database transactions
+- [ ] Rollback on failure
+- [ ] State machine, audit logging
+
+#### Integration
+- [ ] Notify enrollment service on success
+- [ ] Handle enrollment rollback on failure
+
+#### Testing
+- [ ] Unit + API tests
+- [ ] Failure scenarios, refunds
+- [ ] Idempotency, transaction rollback tests
+- [ ] Coverage > 80%
+
+---
+
+## 🧪 MILESTONE 4: COMPREHENSIVE TESTING
+**PR #7:** `feature/milestone-4-testing`
+
+### Unit Tests (Per Service)
+- [ ] Business logic, models, validations
+- [ ] Mock external dependencies
+- [ ] 80%+ coverage per service
+
+### Integration Tests
+- [ ] Database CRUD with real DB
+- [ ] Transactions/rollbacks
+- [ ] Inter-service communication
+- [ ] Full enrollment flow (Course→Enrollment→Payment)
+- [ ] Celery task processing
+- [ ] Docker Compose integration tests
+
+### API Contract Tests
+- [ ] Postman/Newman collections
+- [ ] Happy paths + error scenarios
+- [ ] Auth/authz, input validation
+- [ ] Automate in CI
+
+### Performance/Load Tests (Locust)
+- [ ] User signup/login load
+- [ ] Course listing under load
+- [ ] Concurrent enrollments
+- [ ] Payment processing under load
+- [ ] Benchmarks: p95 < 200ms, 100 concurrent users, 1000 req/sec
+
+### Edge Cases
+- [ ] Enrollment quota exceeded (concurrent requests)
+- [ ] Unauthorized access (admin endpoints, other users' data)
+- [ ] Payment failure → enrollment rollback
+- [ ] Celery retry mechanism
+- [ ] Redis cache expiration/fallback
+
+### Documentation
+- [ ] `tests/README.md` (how to run, coverage, performance results)
+
+---
+
+## 📊 MILESTONE 5: OBSERVABILITY
+**PR #8:** `feature/milestone-5-observability`
+
+### Structured Logging
+- [ ] Configure Loguru/Python logging (JSON format)
+- [ ] Log levels, correlation IDs, rotation
+- [ ] Log: API requests, service calls, business events, errors
+- [ ] Sanitize sensitive data
+
+### Prometheus Metrics
+- [ ] Install prometheus-fastapi-instrumentator
+- [ ] Define metrics:
+  - **Counters:** api_requests_total, enrollments_created, payments_processed, cache_hits/misses
+  - **Gauges:** active_users, courses_count, enrollments_pending
+  - **Histograms:** api_request_duration, db_query_duration, celery_task_duration
+- [ ] Expose `/metrics` endpoint per service
+
+### Grafana Dashboards
+- [ ] Setup Grafana in docker-compose
+- [ ] Create dashboards:
+  - **Service Health:** Request rate, error rate, response time (p50/p95/p99), uptime
+  - **Business Metrics:** Enrollments/day, revenue, top courses, user growth
+  - **Infrastructure:** CPU/Memory, DB pool, Redis hit rate, Celery queue
+- [ ] Export dashboard JSONs to `/monitoring/grafana-dashboards/`
+
+### Health Checks
+- [ ] `/health` (liveness), `/ready` (readiness - DB/Redis)
+
+### Error Tracking (Optional)
+- [ ] Sentry integration, error grouping, alerts
+
+---
+
+## 🚢 MILESTONE 6: CI/CD & DEPLOYMENT
+**PR #9:** `feature/milestone-6-cicd-deployment`
+
+### Enhanced CI Pipeline
+- [ ] Expand `.github/workflows/ci.yml`:
+  - Multi-service parallel testing
+  - Code quality (lint, format, type check, security scan with bandit)
+  - Build + push Docker images (tag with SHA/branch)
+  - Integration tests in CI
+  - Coverage reports
+
+### CD Pipeline
+- [ ] `.github/workflows/cd.yml`:
+  - Trigger on merge to `main`
+  - Deploy to staging (mock/local)
+  - Smoke tests
+  - Manual promotion to production
+- [ ] Document: blue-green, canary, rollback strategies
+
+### Kubernetes Manifests (`/k8s/`)
+- [ ] Namespace: `mlh-platform`
+- [ ] ConfigMaps + Secrets (DB creds, Redis, JWT)
+- [ ] Deployments (User:2, Course:3, Enrollment:2, Payment:2 replicas)
+- [ ] Services (ClusterIP)
+- [ ] StatefulSets (PostgreSQL, MongoDB, Redis)
+- [ ] Ingress (API Gateway with TLS)
+- [ ] HorizontalPodAutoscaler (Course, Enrollment - CPU-based)
+- [ ] PersistentVolumeClaims (PostgreSQL, MongoDB)
+
+### Docker Compose Production
+- [ ] `docker-compose.prod.yml` with resource limits, restart policies, logging
+
+### Deployment Docs
+- [ ] `/docs/deployment/local-setup.md`
+- [ ] `/docs/deployment/kubernetes-deployment.md`
+- [ ] `/docs/deployment/ci-cd-pipeline.md`
+- [ ] `/docs/deployment/environment-variables.md`
+- [ ] `/docs/deployment/troubleshooting.md`
+
+---
+
+## 🌟 MILESTONE 7: STRETCH GOALS (BONUS)
+
+### PR #10: gRPC (Optional)
+**Branch:** `feature/grpc-implementation`
+- [ ] Define `.proto` files (Enrollment ↔ Payment)
+- [ ] Generate Python code, implement server/client
+- [ ] gRPC health checks
+- [ ] REST vs gRPC performance comparison
+
+### PR #11: AI Recommendations (Optional)
+**Branch:** `feature/ai-recommendation-engine`
+- [ ] Collect enrollment history + interactions
+- [ ] Train model (collaborative/content-based filtering with scikit-learn)
+- [ ] Create `/api/v1/recommendations/` endpoint
+- [ ] Cache recommendations, A/B testing
+
+### PR #12: File Upload (Optional)
+**Branch:** `feature/file-upload-service`
+- [ ] MinIO setup (S3-compatible)
+- [ ] Upload endpoints (course materials, avatars)
+- [ ] File validation, pre-signed URLs
+- [ ] Virus scanning (ClamAV)
+
+### PR #13: OpenAI Integration (Optional)
+**Branch:** `feature/openai-integration`
+- [ ] OpenAI API client
+- [ ] `POST /api/v1/courses/{id}/generate-summary`
+- [ ] Prompt engineering, rate limiting, caching, cost monitoring
+
+### PR #14: Enhanced RBAC (Optional)
+**Branch:** `feature/enhanced-rbac`
+- [ ] Fine-grained permissions (Admin, Instructor, Student, Guest)
+- [ ] Permission decorators
+- [ ] Role management endpoints
+
+---
+
+## 📝 FINAL DELIVERABLES CHECKLIST
+
+### Root README.md
+- [ ] Project overview + architecture diagram
+- [ ] Tech stack summary
+- [ ] Quick start guide (prerequisites, setup, URLs)
+- [ ] Project structure tree
+- [ ] API documentation links (Swagger)
+- [ ] Example API calls
+- [ ] Testing instructions
+- [ ] Deployment guide
+- [ ] Contributing guidelines
+- [ ] Design decisions & trade-offs
+
+### Documentation (`/docs/`)
+- [ ] Architecture (HLD/LLD with diagrams)
+- [ ] API specifications (OpenAPI/Swagger files)
+- [ ] Database schemas + ERDs
+- [ ] Deployment guides (local, K8s, cloud)
+- [ ] SDLC documentation
+- [ ] Mock interview Q&A prep
+
+### Tests (`/tests/`)
+- [ ] Unit tests (per service, 80%+ coverage)
+- [ ] Integration tests
+- [ ] API contract tests
+- [ ] Performance test results
+- [ ] Test documentation
+
+### CI/CD
+- [ ] GitHub Actions workflows
+- [ ] CI badge in README
+- [ ] Code coverage badge
+- [ ] Automated linting, testing, building
+
+### Docker & K8s
+- [ ] All Dockerfiles
+- [ ] docker-compose.yml (dev + prod)
+- [ ] Complete K8s manifests
+- [ ] Infrastructure as code
+
+### Code Quality
+- [ ] Type hints throughout
+- [ ] Docstrings for all public APIs
+- [ ] Clean code (PEP8, black, isort)
+- [ ] No security vulnerabilities
+- [ ] Idiomatic Python (async/await, context managers, etc.)
+
+### Monitoring
+- [ ] Prometheus metrics exposed
+- [ ] Grafana dashboards exported
+- [ ] Structured logging implemented
+- [ ] Health check endpoints
+
+### PR Requirements
+- [ ] 4-6 well-structured PRs with descriptions
+- [ ] All PRs reviewed and merged
+- [ ] Clean commit history
+- [ ] Professional commit messages
+
+---
+
+## 📅 TIMELINE & WORKFLOW
+
+### Day 1 (Oct 20): Setup + Architecture + Infrastructure
+- [ ] PR #1: Architecture & Design (Morning)
+- [ ] PR #2: Infrastructure Setup (Afternoon/Evening)
+
+### Day 2 (Oct 21): Service Implementation + Testing
+- [ ] PR #3: User Service (Morning)
+- [ ] PR #4: Course Service (Afternoon)
+- [ ] PR #5: Enrollment Service (Evening)
+- [ ] PR #6: Payment Service (Evening)
+- [ ] PR #7: Testing Suite (Late Evening)
+
+### Day 3 (Oct 22): Observability + CI/CD + Polish + Bonus
+- [ ] PR #8: Observability (Morning)
+- [ ] PR #9: CI/CD & Deployment (Afternoon)
+- [ ] PR #10-14: Stretch Goals (if time permits)
+- [ ] Final polish, documentation review
+- [ ] Submit by 23:59 CAT
+
+### Day 4 (Oct 23): Review & Interview
+- [ ] Code review by reviewers
+- [ ] Technical demo + interview (receive slot Wed evening)
+
+---
+
+## 🎯 GRADING CRITERIA CHECKLIST
+
+### Programming Proficiency (25%)
+- [ ] Idiomatic Python code
+- [ ] Type hints throughout
+- [ ] Proper error handling
+- [ ] Async/await usage
+- [ ] Clean, readable code
+
+### API Design & Microservices (20%)
+- [ ] Clean API contracts (RESTful)
+- [ ] Service separation (User, Course, Enrollment, Payment)
+- [ ] Proper modularity
+- [ ] Inter-service communication
+
+### Database Architecture (15%)
+- [ ] Normalized schemas
+- [ ] Proper indexing
+- [ ] Migrations (Alembic)
+- [ ] Multi-DB (PostgreSQL + MongoDB + Redis)
+
+### DevOps & CI/CD (10%)
+- [ ] Docker + docker-compose
+- [ ] GitHub Actions pipelines
+- [ ] Lint/test automation
+
+### Software Testing (10%)
+- [ ] Unit tests
+- [ ] Integration tests
+- [ ] API tests
+- [ ] Performance tests
+
+### Observability (5%)
+- [ ] Logging
+- [ ] Metrics
+- [ ] Error tracking
+- [ ] Dashboards
+
+### Documentation (10%)
+- [ ] HLD/LLD diagrams
+- [ ] API documentation
+- [ ] SDLC docs
+- [ ] Clear README
+
+### Bonus (5%)
+- [ ] AI features
+- [ ] gRPC
+- [ ] ML model
+- [ ] Extra integrations
+
+---
+
+## 💡 BEST PRACTICES & REMINDERS
+
+### Development
+- [ ] Follow GitFlow: feature branches → PR → review → merge
+- [ ] Write tests before/alongside implementation (TDD when possible)
+- [ ] Use meaningful commit messages (Conventional Commits)
+- [ ] Keep services independent (no tight coupling)
+- [ ] Implement circuit breakers for inter-service calls
+- [ ] Use environment variables (never hardcode secrets)
+
+### Testing
+- [ ] Test happy paths AND edge cases
+- [ ] Mock external dependencies in unit tests
+- [ ] Use real services in integration tests
+- [ ] Document test coverage
+
+### Documentation
+- [ ] Keep README up-to-date
+- [ ] Document design decisions and trade-offs
+- [ ] Include setup instructions
+- [ ] Add inline code comments for complex logic
+
+### Security
+- [ ] Never commit secrets/API keys
+- [ ] Hash passwords (bcrypt)
+- [ ] Validate all inputs
+- [ ] Implement proper RBAC
+- [ ] Use HTTPS/TLS
+- [ ] Sanitize logs (no sensitive data)
+
+### Performance
+- [ ] Use indexes on frequent queries
+- [ ] Implement caching where appropriate
+- [ ] Use pagination for large datasets
+- [ ] Optimize N+1 queries
+- [ ] Profile and benchmark
+
+---
+
+## 🚨 CRITICAL SUCCESS FACTORS
+
+1. **Complete all 4 core services** (User, Course, Enrollment, Payment)
+2. **Implement authentication + authorization** (JWT, RBAC)
+3. **Add caching** (Redis for Course Service)
+4. **Async processing** (Celery for enrollments)
+5. **Comprehensive testing** (unit + integration + API + performance)
+6. **Observability** (logging + metrics + dashboards)
+7. **CI/CD pipeline** (working GitHub Actions)
+8. **Complete documentation** (architecture diagrams, API docs, README)
+9. **4-6 well-structured PRs** with proper descriptions
+10. **Working Docker Compose** setup
+
+---
+
+## 📞 SUPPORT & RESOURCES
+
+### Primary Resources
+- [FastAPI Documentation](https://fastapi.tiangolo.com/)
+- [SQLAlchemy Documentation](https://docs.sqlalchemy.org/)
+- [Celery Documentation](https://docs.celeryq.dev/)
+- [Redis Documentation](https://redis.io/docs/)
+- [Pytest Documentation](https://docs.pytest.org/)
+
+### Tools
+- **API Testing:** Postman, httpie, curl
+- **Load Testing:** Locust, JMeter
+- **Monitoring:** Prometheus, Grafana
+- **Diagramming:** Draw.io, PlantUML, Excalidraw
+
+### Mock Interview Prep
+- [ ] System thinking: Service boundary decisions
+- [ ] Error handling: Preventing cascade failures
+- [ ] Testing approach: Unit vs integration
+- [ ] Security: JWT security, endpoint protection
+- [ ] CI/CD: Cloud deployment automation
+- [ ] Database: Indexing strategies
+- [ ] Observability: Real-time anomaly detection
+
+---
+
+**Last Updated:** October 21, 2025  
+**Status:** Ready to build 🚀
