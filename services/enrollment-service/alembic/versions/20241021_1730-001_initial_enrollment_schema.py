@@ -7,6 +7,7 @@ Create Date: 2024-10-21 17:30:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -26,7 +27,7 @@ def upgrade() -> None:
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('user_id', sa.Integer(), nullable=False),
         sa.Column('course_id', sa.Integer(), nullable=False),
-        sa.Column('status', sa.Enum('pending', 'active', 'completed', 'cancelled', name='enrollmentstatus', create_type=False), nullable=False, server_default='pending'),
+        sa.Column('status', postgresql.ENUM('pending', 'active', 'completed', 'cancelled', name='enrollmentstatus', create_type=False), nullable=False, server_default='pending'),
         sa.Column('enrolled_at', sa.DateTime(timezone=True), server_default=sa.text('now()'), nullable=False),
         sa.Column('completed_at', sa.DateTime(timezone=True), nullable=True),
         sa.Column('progress_percentage', sa.Integer(), nullable=False, server_default='0'),
