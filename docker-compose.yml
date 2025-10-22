@@ -1,0 +1,297 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Databases
+  # ============================================
+  
+  postgres:
+    image: postgres:15-alpine
+    container_name: mlh-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mlh_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mlh_secure_password}
+      POSTGRES_DB: ${POSTGRES_DB:-mlh_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - mlh-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mlh_user} -d ${POSTGRES_DB:-mlh_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:6
+    container_name: mlh-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_USER:-mlh_mongo_user}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD:-mlh_mongo_password}
+      MONGO_INITDB_DATABASE: ${MONGODB_DB:-mlh_content_db}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mlh-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mlh-redis
+    command: redis-server --requirepass ${REDIS_PASSWORD:-mlh_redis_password}
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mlh-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================
+  # Microservices
+  # ============================================
+  
+  user-service:
+    build:
+      context: ./services/user-service
+      dockerfile: Dockerfile
+    container_name: mlh-user-service
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-true}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${USER_DB_NAME:-user_db}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-15}
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./services/user-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mlh-network
+    command: ["./entry.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  course-service:
+    build:
+      context: ./services/course-service
+      dockerfile: Dockerfile
+    container_name: mlh-course-service
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-true}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${COURSE_DB_NAME:-course_db}
+      - MONGODB_URL=mongodb://${MONGODB_USER:-mlh_mongo_user}:${MONGODB_PASSWORD:-mlh_mongo_password}@mongodb:27017/${MONGODB_DB:-mlh_content_db}?authSource=admin
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
+      - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/course-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+    networks:
+      - mlh-network
+    command: ["./entry.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  enrollment-service:
+    build:
+      context: ./services/enrollment-service
+      dockerfile: Dockerfile
+    container_name: mlh-enrollment-service
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-true}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${ENROLLMENT_DB_NAME:-enrollment_db}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://:mlh_redis_password@redis:6379/1}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://:mlh_redis_password@redis:6379/2}
+      - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
+      - COURSE_SERVICE_URL=${COURSE_SERVICE_URL:-http://course-service:8002}
+      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL:-http://payment-service:8004}
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./services/enrollment-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      course-service:
+        condition: service_started
+    networks:
+      - mlh-network
+    command: ["./entry.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  payment-service:
+    build:
+      context: ./services/payment-service
+      dockerfile: Dockerfile
+    container_name: mlh-payment-service
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DEBUG=${DEBUG:-true}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${PAYMENT_DB_NAME:-payment_db}
+      - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
+      - COURSE_SERVICE_URL=${COURSE_SERVICE_URL:-http://course-service:8002}
+      - ENROLLMENT_SERVICE_URL=${ENROLLMENT_SERVICE_URL:-http://enrollment-service:8003}
+      - PAYMENT_GATEWAY_API_KEY=${PAYMENT_GATEWAY_API_KEY}
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./services/payment-service:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      user-service:
+        condition: service_started
+      course-service:
+        condition: service_started
+    networks:
+      - mlh-network
+    command: ["./entry.sh"]
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # Celery Worker
+  # ============================================
+  
+  celery-worker:
+    build:
+      context: ./services/enrollment-service
+      dockerfile: Dockerfile
+    container_name: mlh-celery-worker
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${ENROLLMENT_DB_NAME:-enrollment_db}
+      - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://:mlh_redis_password@redis:6379/1}
+      - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://:mlh_redis_password@redis:6379/2}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+    volumes:
+      - ./services/enrollment-service:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+      enrollment-service:
+        condition: service_started
+    networks:
+      - mlh-network
+    command: celery -A app.celery worker --loglevel=info
+
+  # ============================================
+  # Monitoring & Observability
+  # ============================================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: mlh-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    networks:
+      - mlh-network
+    depends_on:
+      - user-service
+      - course-service
+      - enrollment-service
+      - payment-service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: mlh-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    networks:
+      - mlh-network
+    depends_on:
+      - prometheus
+
+# ============================================
+# Networks
+# ============================================
+
+networks:
+  mlh-network:
+    driver: bridge
+    name: mlh-network
+
+# ============================================
+# Volumes
+# ============================================
+
+volumes:
+  postgres_data:
+    driver: local
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

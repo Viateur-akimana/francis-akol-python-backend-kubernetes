@@ -1,0 +1,38 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'mlh-monitor'
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'user-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['user-service:8001']
+        labels:
+          service: 'user-service'
+
+  - job_name: 'course-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['course-service:8002']
+        labels:
+          service: 'course-service'
+
+  - job_name: 'enrollment-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['enrollment-service:8003']
+        labels:
+          service: 'enrollment-service'
+
+  - job_name: 'payment-service'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['payment-service:8004']
+        labels:
+          service: 'payment-service'
