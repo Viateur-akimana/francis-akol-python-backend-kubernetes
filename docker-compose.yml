@@ -72,7 +72,7 @@ services:
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - DEBUG=${DEBUG:-true}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${USER_DB_NAME:-user_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${USER_DB_NAME:-user_db}
       - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
@@ -103,7 +103,7 @@ services:
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - DEBUG=${DEBUG:-true}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${COURSE_DB_NAME:-course_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${COURSE_DB_NAME:-course_db}
       - MONGODB_URL=mongodb://${MONGODB_USER:-mlh_mongo_user}:${MONGODB_PASSWORD:-mlh_mongo_password}@mongodb:27017/${MONGODB_DB:-mlh_content_db}?authSource=admin
       - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
       - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
@@ -137,7 +137,7 @@ services:
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - DEBUG=${DEBUG:-true}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${ENROLLMENT_DB_NAME:-enrollment_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${ENROLLMENT_DB_NAME:-enrollment_db}
       - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
       - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://:mlh_redis_password@redis:6379/1}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://:mlh_redis_password@redis:6379/2}
@@ -174,7 +174,7 @@ services:
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - DEBUG=${DEBUG:-true}
-      - DATABASE_URL=postgresql://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${PAYMENT_DB_NAME:-payment_db}
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${PAYMENT_DB_NAME:-payment_db}
       - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
       - COURSE_SERVICE_URL=${COURSE_SERVICE_URL:-http://course-service:8002}
       - ENROLLMENT_SERVICE_URL=${ENROLLMENT_SERVICE_URL:-http://enrollment-service:8003}
