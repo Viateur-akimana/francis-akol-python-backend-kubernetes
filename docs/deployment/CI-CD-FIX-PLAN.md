@@ -25,20 +25,16 @@
 ## 🎯 Fix Plan Overview
 
 ### Phase 1: Fix Existing CI Pipeline (Priority: CRITICAL)
-**Estimated Time:** 
-**Grading Impact:**  (DevOps & CI/CD)
+**Estimated Time:** 2-3 hours
 
 ### Phase 2: Add Missing Test Suite (Priority: HIGH)
-**Estimated Time:** 
-**Grading Impact:** (Software Testing)
+**Estimated Time:** 4-6 hours
 
 ### Phase 3: Enhance Observability (Priority: MEDIUM)
-**Estimated Time:** 
-**Grading Impact:** (Observability)
+**Estimated Time:** 2-3 hours
 
 ### Phase 4: Add Deployment Artifacts (Priority: MEDIUM)
-**Estimated Time:** 
-**Grading Impact:** (K8s manifests for deployment)
+**Estimated Time:** 3-4 hours
 
 ---
 
@@ -323,7 +319,7 @@ jobs:
 
 ### 2.1 Unit Tests (Per Service)
 **Branch:** `feature/unit-tests`  
-**Target Coverage:** 80%+
+**Target Coverage:** Comprehensive
 
 **File Structure:**
 ```
@@ -412,10 +408,10 @@ async def test_create_user(db_session):
 ```
 
 **Commit per service:**
-- `test: add comprehensive unit tests for user-service (80%+ coverage)`
-- `test: add comprehensive unit tests for course-service (80%+ coverage)`
-- `test: add comprehensive unit tests for enrollment-service (80%+ coverage)`
-- `test: add comprehensive unit tests for payment-service (80%+ coverage)`
+- `test: add comprehensive unit tests for user-service`
+- `test: add comprehensive unit tests for course-service`
+- `test: add comprehensive unit tests for enrollment-service`
+- `test: add comprehensive unit tests for payment-service`
 
 ---
 
@@ -643,54 +639,11 @@ spec:
 ```markdown
 # Modular Learning Hub (MLH)
 
-![CI](https://github.com/franakol/francis-akol-python-backend-assessment/workflows/CI%20Pipeline/badge.svg)
-[![codecov](https://codecov.io/gh/franakol/francis-akol-python-backend-assessment/branch/main/graph/badge.svg)](https://codecov.io/gh/franakol/francis-akol-python-backend-assessment)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue)
+![Coverage](https://img.shields.io/badge/coverage-check-green)
 ![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688.svg)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)
 ```
 
 ---
-
-## 🎯 Estimated Grading Impact
-
-| Component | Current | After Fixes | Gain |
-|-----------|---------|-------------|------|
-| **DevOps & CI/CD** | 0/10% | 10/10% | +10% |
-| **Software Testing** | 2/10% | 10/10% | +8% |
-| **Documentation** | 8/10% | 10/10% | +2% |
-| **Programming** | 22/25% | 24/25% | +2% |
-| **TOTAL IMPACT** | - | - | **+22%** |
-
-**New Total Score:** 83-96% → **105-118%** (capped at 100% + bonus)
-
----
-
-## 📝 Implementation Checklist
-
-### Immediate (Today)
-- [ ] Fix linting issues (1 hour)
-- [ ] Update CI workflow (1 hour)
-- [ ] Add basic unit tests (2 hours)
-
-### Short-term (Tomorrow)
-- [ ] Complete unit tests (4 hours)
-- [ ] Add integration tests (3 hours)
-- [ ] Setup K8s manifests (3 hours)
-
-### Medium-term (This Week)
-- [ ] Performance tests with Locust (2 hours)
-- [ ] Security scanning setup (1 hour)
-- [ ] Complete documentation (2 hours)
-
----
-
-**Next Steps:**
-1. ✅ Enable CI pipeline
-2. Fix linting and type issues
-3. Add test suites service by service
-4. Deploy K8s manifests
-5. Run performance benchmarks
-6. Document everything
-
-**Status:** Ready for implementation 🚀
