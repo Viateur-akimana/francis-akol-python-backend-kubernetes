@@ -17,8 +17,8 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create enrollmentstatus enum
-    op.execute("CREATE TYPE enrollmentstatus AS ENUM ('pending', 'active', 'completed', 'cancelled')")
+    # Create enrollmentstatus enum (if not exists)
+    op.execute("DO $$ BEGIN CREATE TYPE enrollmentstatus AS ENUM ('pending', 'active', 'completed', 'cancelled'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
 
     # Create enrollments table
     op.create_table(
