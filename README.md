@@ -106,27 +106,18 @@ The Modular Learning Hub (MLH) is a modern, scalable Learning Management System 
    # Edit .env with your configuration
    ```
 
-3. **Start services with Docker Compose**
+3. **Start all services**
    ```bash
+   # Copy environment file
+   cp .env.example .env
+   
+   # Start all services (migrations run automatically)
    docker-compose up -d
    ```
 
-4. **Run database migrations**
-   ```bash
-   # User Service
-   docker-compose exec user-service alembic upgrade head
-   
-   # Course Service
-   docker-compose exec course-service alembic upgrade head
-   
-   # Enrollment Service
-   docker-compose exec enrollment-service alembic upgrade head
-   
-   # Payment Service
-   docker-compose exec payment-service alembic upgrade head
-   ```
+> **Note:** Database migrations are now run automatically when services start. No manual migration step required!
 
-5. **Access services**
+4. **Access services**
    - User Service API: http://localhost:8001
    - Course Service API: http://localhost:8002
    - Enrollment Service API: http://localhost:8003

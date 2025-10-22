@@ -86,31 +86,81 @@ async def get_current_user_email(
     return email
 
 
-def require_role(allowed_roles: list[str]):
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Dependency to get current authenticated user from database.
+
+    Args:
+        credentials: HTTP Authorization credentials
+        db: Database session
+
+    Returns:
+        User object
+
+    Raises:
+        HTTPException: If token is invalid or user not found
+    """
+    from app.models.user import User
+    from sqlalchemy import select
+
+    token = credentials.credentials
+    payload = decode_token(token)
+    verify_token_type(payload, "access")
+
+    user_id: Optional[str] = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    # Get user from database
+    result = await db.execute(select(User).where(User.id == int(user_id)))
+    user = result.scalar_one_or_none()
+
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Inactive user",
+        )
+
+    return user
+
+
+def require_role(allowed_roles: list):
     """
     Dependency factory to check if user has required role.
 
     Args:
-        allowed_roles: List of allowed roles
+        allowed_roles: List of allowed UserRole enums
 
     Returns:
-        Dependency function
+        Dependency function that returns User object
     """
 
     async def role_checker(
-        credentials: HTTPAuthorizationCredentials = Depends(security),
-    ) -> dict:
-        token = credentials.credentials
-        payload = decode_token(token)
-        verify_token_type(payload, "access")
+        current_user = Depends(get_current_user),
+    ):
+        # Convert UserRole enum to string for comparison
+        allowed_role_values = [role.value if hasattr(role, 'value') else role for role in allowed_roles]
 
-        user_role: Optional[str] = payload.get("role")
-        if user_role not in allowed_roles:
+        if current_user.role.value not in allowed_role_values:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail=f"Insufficient permissions. Required roles: {', '.join(allowed_roles)}",
+                detail=f"Insufficient permissions. Required roles: {', '.join(allowed_role_values)}",
             )
 
-        return payload
+        return current_user
 
     return role_checker

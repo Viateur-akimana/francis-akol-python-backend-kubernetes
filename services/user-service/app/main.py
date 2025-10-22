@@ -86,10 +86,10 @@ async def root():
     }
 
 
-# API routers will be added here
-# from app.api.v1.endpoints import auth, users
-# app.include_router(auth.router, prefix="/api/v1/auth", tags=["Authentication"])
-# app.include_router(users.router, prefix="/api/v1/users", tags=["Users"])
+# Include API v1 router
+from app.api.v1 import api_router
+
+app.include_router(api_router, prefix="/api/v1")
 
 
 if __name__ == "__main__":
