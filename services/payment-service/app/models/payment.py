@@ -80,7 +80,7 @@ class Payment(Base, TimestampMixin):
     refunded_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string
+    payment_metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string
 
     def __repr__(self) -> str:
         return f"<Payment(id={self.id}, user_id={self.user_id}, course_id={self.course_id}, amount={self.amount}, status={self.status})>"
