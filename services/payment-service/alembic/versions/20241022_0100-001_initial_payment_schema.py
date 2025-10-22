@@ -17,11 +17,11 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # Create paymentstatus enum
-    op.execute("CREATE TYPE paymentstatus AS ENUM ('pending', 'completed', 'failed', 'refunded')")
+    # Create paymentstatus enum (if not exists)
+    op.execute("DO $$ BEGIN CREATE TYPE paymentstatus AS ENUM ('pending', 'completed', 'failed', 'refunded'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
     
-    # Create paymentmethod enum
-    op.execute("CREATE TYPE paymentmethod AS ENUM ('credit_card', 'debit_card', 'paypal', 'stripe', 'bank_transfer')")
+    # Create paymentmethod enum (if not exists)
+    op.execute("DO $$ BEGIN CREATE TYPE paymentmethod AS ENUM ('credit_card', 'debit_card', 'paypal', 'stripe', 'bank_transfer'); EXCEPTION WHEN duplicate_object THEN null; END $$;")
 
     # Create payments table
     op.create_table(
