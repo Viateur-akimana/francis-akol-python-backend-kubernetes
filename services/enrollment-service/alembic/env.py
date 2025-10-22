@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from alembic import context
 from app.core.config import settings
 from app.db.base import Base
-from app.models import course  # noqa: F401 - Import models to register them
+from app.models import enrollment  # noqa: F401 - Import models to register them
 from sqlalchemy import engine_from_config, pool
 
 # this is the Alembic Config object

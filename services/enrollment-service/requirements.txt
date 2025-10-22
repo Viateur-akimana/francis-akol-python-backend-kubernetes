@@ -12,7 +12,7 @@ alembic==1.12.1
 psycopg2-binary==2.9.9
 
 # Redis
-redis==5.0.1
+redis==4.6.0
 hiredis==2.2.3
 
 # Celery
