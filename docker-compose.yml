@@ -20,7 +20,7 @@ services:
     networks:
       - mlh-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mlh_user}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-mlh_user} -d ${POSTGRES_DB:-mlh_db}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -88,7 +88,7 @@ services:
         condition: service_healthy
     networks:
       - mlh-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    command: ["./entry.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 30s
@@ -122,7 +122,7 @@ services:
         condition: service_started
     networks:
       - mlh-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+    command: ["./entry.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
       interval: 30s
@@ -159,7 +159,7 @@ services:
         condition: service_started
     networks:
       - mlh-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8003 --reload
+    command: ["./entry.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
       interval: 30s
@@ -192,7 +192,7 @@ services:
         condition: service_started
     networks:
       - mlh-network
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8004 --reload
+    command: ["./entry.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
       interval: 30s

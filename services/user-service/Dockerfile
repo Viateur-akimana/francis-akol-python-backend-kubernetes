@@ -11,6 +11,7 @@ ENV PYTHONUNBUFFERED=1 \
 RUN apt-get update && apt-get install -y \
     gcc \
     postgresql-client \
+    redis-tools \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
