@@ -47,7 +47,7 @@ class Enrollment(Base, TimestampMixin):
     user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     course_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     status: Mapped[EnrollmentStatus] = mapped_column(
-        Enum(EnrollmentStatus),
+        Enum(EnrollmentStatus, name='enrollmentstatus', create_type=False),
         default=EnrollmentStatus.PENDING,
         nullable=False,
         index=True,
