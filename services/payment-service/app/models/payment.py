@@ -61,13 +61,13 @@ class Payment(Base, TimestampMixin):
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="USD")
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus),
+        Enum(PaymentStatus, name='paymentstatus', create_type=False),
         default=PaymentStatus.PENDING,
         nullable=False,
         index=True,
     )
     payment_method: Mapped[PaymentMethod] = mapped_column(
-        Enum(PaymentMethod), nullable=False
+        Enum(PaymentMethod, name='paymentmethod', create_type=False), nullable=False
     )
     transaction_id: Mapped[Optional[str]] = mapped_column(
         String(255), unique=True, nullable=True, index=True
