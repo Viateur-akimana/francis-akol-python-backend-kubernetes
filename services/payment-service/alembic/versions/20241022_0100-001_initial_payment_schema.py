@@ -7,6 +7,7 @@ Create Date: 2024-10-22 01:00:00.000000
 """
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
 
 
 # revision identifiers, used by Alembic.
@@ -32,8 +33,8 @@ def upgrade() -> None:
         sa.Column('enrollment_id', sa.Integer(), nullable=True),
         sa.Column('amount', sa.Numeric(precision=10, scale=2), nullable=False),
         sa.Column('currency', sa.String(length=3), nullable=False, server_default='USD'),
-        sa.Column('status', sa.Enum('pending', 'completed', 'failed', 'refunded', name='paymentstatus', create_type=False), nullable=False, server_default='pending'),
-        sa.Column('payment_method', sa.Enum('credit_card', 'debit_card', 'paypal', 'stripe', 'bank_transfer', name='paymentmethod', create_type=False), nullable=False),
+        sa.Column('status', postgresql.ENUM('pending', 'completed', 'failed', 'refunded', name='paymentstatus', create_type=False), nullable=False, server_default='pending'),
+        sa.Column('payment_method', postgresql.ENUM('credit_card', 'debit_card', 'paypal', 'stripe', 'bank_transfer', name='paymentmethod', create_type=False), nullable=False),
         sa.Column('transaction_id', sa.String(length=255), nullable=True),
         sa.Column('payment_intent_id', sa.String(length=255), nullable=True),
         sa.Column('failure_reason', sa.Text(), nullable=True),
