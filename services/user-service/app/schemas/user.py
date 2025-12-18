@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Optional
 
 from app.models.user import UserRole
-from pydantic import BaseModel, EmailStr, Field, ConfigDict
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 # Base schemas
@@ -43,7 +43,9 @@ class UserUpdateRequest(BaseModel):
     """Schema for user update request."""
 
     email: Optional[EmailStr] = None
-    username: Optional[str] = Field(None, min_length=3, max_length=50, pattern="^[a-zA-Z0-9_-]+$")
+    username: Optional[str] = Field(
+        None, min_length=3, max_length=50, pattern="^[a-zA-Z0-9_-]+$"
+    )
 
 
 class ProfileUpdateRequest(ProfileBase):

@@ -24,14 +24,15 @@ class CourseRepository:
         await self.db.refresh(course)
         return course
 
-    async def get_course_by_id(self, course_id: int, include_contents: bool = True) -> Optional[Course]:
+    async def get_course_by_id(
+        self, course_id: int, include_contents: bool = True
+    ) -> Optional[Course]:
         """Get course by ID with optional content loading."""
         query = select(Course).where(Course.id == course_id)
 
         if include_contents:
             query = query.options(
-                selectinload(Course.category),
-                selectinload(Course.contents)
+                selectinload(Course.category), selectinload(Course.contents)
             )
         else:
             query = query.options(selectinload(Course.category))
@@ -68,7 +69,7 @@ class CourseRepository:
             query = query.where(
                 or_(
                     Course.title.ilike(search_term),
-                    Course.description.ilike(search_term)
+                    Course.description.ilike(search_term),
                 )
             )
 
@@ -116,7 +117,7 @@ class CourseRepository:
             query = query.where(
                 or_(
                     Course.title.ilike(search_term),
-                    Course.description.ilike(search_term)
+                    Course.description.ilike(search_term),
                 )
             )
 
@@ -142,7 +143,9 @@ class CourseRepository:
             await self.db.commit()
 
     # Course Content operations
-    async def create_course_content(self, course_id: int, content_data: dict) -> CourseContent:
+    async def create_course_content(
+        self, course_id: int, content_data: dict
+    ) -> CourseContent:
         """Create course content."""
         content = CourseContent(**content_data, course_id=course_id)
         self.db.add(content)
@@ -159,7 +162,9 @@ class CourseRepository:
         )
         return list(result.scalars().all())
 
-    async def get_course_content_by_id(self, content_id: int) -> Optional[CourseContent]:
+    async def get_course_content_by_id(
+        self, content_id: int
+    ) -> Optional[CourseContent]:
         """Get course content by ID."""
         result = await self.db.execute(
             select(CourseContent).where(CourseContent.id == content_id)
@@ -188,7 +193,9 @@ class CourseRepository:
 
     async def get_category_by_id(self, category_id: int) -> Optional[Category]:
         """Get category by ID."""
-        result = await self.db.execute(select(Category).where(Category.id == category_id))
+        result = await self.db.execute(
+            select(Category).where(Category.id == category_id)
+        )
         return result.scalar_one_or_none()
 
     async def get_category_by_slug(self, slug: str) -> Optional[Category]:

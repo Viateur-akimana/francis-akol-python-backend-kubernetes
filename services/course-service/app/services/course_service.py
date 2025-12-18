@@ -23,7 +23,9 @@ class CourseService:
         """Initialize course service with repository."""
         self.course_repository = course_repository
 
-    async def create_course(self, course_data: CourseCreate, instructor_id: int) -> CourseResponse:
+    async def create_course(
+        self, course_data: CourseCreate, instructor_id: int
+    ) -> CourseResponse:
         """Create a new course."""
         # Create course in database
         course = await self.course_repository.create_course(
@@ -37,7 +39,9 @@ class CourseService:
         course = await self.course_repository.get_course_by_id(course.id)
         return CourseResponse.model_validate(course)
 
-    async def get_course_by_id(self, course_id: int, use_cache: bool = True) -> CourseResponse:
+    async def get_course_by_id(
+        self, course_id: int, use_cache: bool = True
+    ) -> CourseResponse:
         """
         Get course by ID with caching.
 
@@ -149,7 +153,9 @@ class CourseService:
         self, course_id: int, course_data: CourseUpdate, instructor_id: int
     ) -> CourseResponse:
         """Update a course."""
-        course = await self.course_repository.get_course_by_id(course_id, include_contents=False)
+        course = await self.course_repository.get_course_by_id(
+            course_id, include_contents=False
+        )
 
         if not course:
             raise HTTPException(
@@ -179,9 +185,13 @@ class CourseService:
         course = await self.course_repository.get_course_by_id(course_id)
         return CourseResponse.model_validate(course)
 
-    async def delete_course(self, course_id: int, instructor_id: int, is_admin: bool = False) -> None:
+    async def delete_course(
+        self, course_id: int, instructor_id: int, is_admin: bool = False
+    ) -> None:
         """Delete a course."""
-        course = await self.course_repository.get_course_by_id(course_id, include_contents=False)
+        course = await self.course_repository.get_course_by_id(
+            course_id, include_contents=False
+        )
 
         if not course:
             raise HTTPException(

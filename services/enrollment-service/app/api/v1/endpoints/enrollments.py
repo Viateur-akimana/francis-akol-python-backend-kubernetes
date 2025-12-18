@@ -20,7 +20,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter()
 
 
-@router.post("/", response_model=EnrollmentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=EnrollmentResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_enrollment(
     enrollment_data: EnrollmentCreate,
     x_user_id: int = Header(..., description="User ID from auth service"),
@@ -28,12 +30,12 @@ async def create_enrollment(
 ):
     """
     Enroll in a course (student).
-    
+
     Creates enrollment with PENDING status and triggers async processing:
     - Checks course availability
     - Validates max students quota
     - Activates enrollment if successful
-    
+
     - **course_id**: Course ID to enroll in
     """
     enrollment_repository = EnrollmentRepository(db)
@@ -51,7 +53,7 @@ async def get_user_enrollments(
 ):
     """
     Get current user's enrollments (paginated).
-    
+
     - **page**: Page number
     - **page_size**: Items per page
     - **status**: Filter by status (PENDING, ACTIVE, COMPLETED, CANCELLED)
@@ -70,7 +72,7 @@ async def get_enrollment_stats(
 ):
     """
     Get enrollment statistics for current user.
-    
+
     Returns:
     - Total enrollments
     - Active/Completed/Cancelled/Pending counts
@@ -88,7 +90,7 @@ async def get_enrollment(
 ):
     """
     Get enrollment by ID.
-    
+
     - **enrollment_id**: Enrollment ID
     """
     enrollment_repository = EnrollmentRepository(db)
@@ -105,14 +107,16 @@ async def update_enrollment(
 ):
     """
     Update enrollment (progress, status).
-    
+
     - **enrollment_id**: Enrollment ID to update
     - **progress_percentage**: Progress (0-100)
     - **status**: New status
     """
     enrollment_repository = EnrollmentRepository(db)
     enrollment_service = EnrollmentService(enrollment_repository)
-    return await enrollment_service.update_enrollment(enrollment_id, enrollment_data, x_user_id)
+    return await enrollment_service.update_enrollment(
+        enrollment_id, enrollment_data, x_user_id
+    )
 
 
 @router.delete("/{enrollment_id}", response_model=MessageResponse)
@@ -123,7 +127,7 @@ async def cancel_enrollment(
 ):
     """
     Cancel enrollment.
-    
+
     - **enrollment_id**: Enrollment ID to cancel
     """
     enrollment_repository = EnrollmentRepository(db)
@@ -132,7 +136,9 @@ async def cancel_enrollment(
     return MessageResponse(message=f"Enrollment {enrollment_id} cancelled successfully")
 
 
-@router.get("/courses/{course_id}/enrollments", response_model=PaginatedEnrollmentResponse)
+@router.get(
+    "/courses/{course_id}/enrollments", response_model=PaginatedEnrollmentResponse
+)
 async def get_course_enrollments(
     course_id: int,
     page: int = Query(1, ge=1),
@@ -143,7 +149,7 @@ async def get_course_enrollments(
 ):
     """
     Get enrollments for a course (instructor only).
-    
+
     - **course_id**: Course ID
     - **page**: Page number
     - **page_size**: Items per page
@@ -152,5 +158,9 @@ async def get_course_enrollments(
     enrollment_repository = EnrollmentRepository(db)
     enrollment_service = EnrollmentService(enrollment_repository)
     return await enrollment_service.get_course_enrollments(
-        course_id, x_user_id, page=page, page_size=page_size, status_filter=status_filter
+        course_id,
+        x_user_id,
+        page=page,
+        page_size=page_size,
+        status_filter=status_filter,
     )

@@ -29,14 +29,14 @@ class EnrollmentService:
     ) -> EnrollmentResponse:
         """
         Create a new enrollment and process it asynchronously.
-        
+
         Args:
             enrollment_data: Enrollment creation data
             user_id: User ID creating the enrollment
-            
+
         Returns:
             Enrollment response
-            
+
         Raises:
             HTTPException: If already enrolled
         """
@@ -44,40 +44,47 @@ class EnrollmentService:
         existing = await self.enrollment_repository.get_user_enrollment_for_course(
             user_id, enrollment_data.course_id
         )
-        
-        if existing and existing.status in [EnrollmentStatus.ACTIVE, EnrollmentStatus.PENDING]:
+
+        if existing and existing.status in [
+            EnrollmentStatus.ACTIVE,
+            EnrollmentStatus.PENDING,
+        ]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Already enrolled in this course",
             )
-        
+
         # Create enrollment with pending status
         enrollment = await self.enrollment_repository.create_enrollment(
             user_id, enrollment_data.course_id
         )
-        
+
         # Trigger async processing
         process_enrollment.delay(enrollment.id)
-        
+
         return EnrollmentResponse.model_validate(enrollment)
 
-    async def get_enrollment_by_id(self, enrollment_id: int, user_id: int) -> EnrollmentResponse:
+    async def get_enrollment_by_id(
+        self, enrollment_id: int, user_id: int
+    ) -> EnrollmentResponse:
         """Get enrollment by ID."""
-        enrollment = await self.enrollment_repository.get_enrollment_by_id(enrollment_id)
-        
+        enrollment = await self.enrollment_repository.get_enrollment_by_id(
+            enrollment_id
+        )
+
         if not enrollment:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Enrollment not found",
             )
-        
+
         # Check if user owns this enrollment
         if enrollment.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to access this enrollment",
             )
-        
+
         return EnrollmentResponse.model_validate(enrollment)
 
     async def get_user_enrollments(
@@ -92,18 +99,20 @@ class EnrollmentService:
             page = 1
         if page_size < 1 or page_size > 100:
             page_size = 10
-        
+
         skip = (page - 1) * page_size
-        
+
         # Get enrollments and total count
         enrollments = await self.enrollment_repository.get_user_enrollments(
             user_id, skip=skip, limit=page_size, status=status_filter
         )
-        total = await self.enrollment_repository.count_user_enrollments(user_id, status=status_filter)
-        
+        total = await self.enrollment_repository.count_user_enrollments(
+            user_id, status=status_filter
+        )
+
         # Calculate total pages
         total_pages = math.ceil(total / page_size)
-        
+
         return PaginatedEnrollmentResponse(
             items=[EnrollmentResponse.model_validate(e) for e in enrollments],
             total=total,
@@ -116,61 +125,67 @@ class EnrollmentService:
         self, enrollment_id: int, enrollment_data: EnrollmentUpdate, user_id: int
     ) -> EnrollmentResponse:
         """Update enrollment."""
-        enrollment = await self.enrollment_repository.get_enrollment_by_id(enrollment_id)
-        
+        enrollment = await self.enrollment_repository.get_enrollment_by_id(
+            enrollment_id
+        )
+
         if not enrollment:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Enrollment not found",
             )
-        
+
         # Check if user owns this enrollment
         if enrollment.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to update this enrollment",
             )
-        
+
         # Update fields
         update_dict = enrollment_data.model_dump(exclude_unset=True)
-        
+
         for key, value in update_dict.items():
             if key == "status" and value == EnrollmentStatus.COMPLETED:
                 enrollment.completed_at = datetime.utcnow()
             setattr(enrollment, key, value)
-        
+
         enrollment = await self.enrollment_repository.update_enrollment(enrollment)
-        
+
         # If progress updated, trigger async task
         if "progress_percentage" in update_dict:
-            update_enrollment_progress.delay(enrollment.id, enrollment.progress_percentage)
-        
+            update_enrollment_progress.delay(
+                enrollment.id, enrollment.progress_percentage
+            )
+
         return EnrollmentResponse.model_validate(enrollment)
 
     async def cancel_enrollment(self, enrollment_id: int, user_id: int) -> None:
         """Cancel enrollment."""
-        enrollment = await self.enrollment_repository.get_enrollment_by_id(enrollment_id)
-        
+        enrollment = await self.enrollment_repository.get_enrollment_by_id(
+            enrollment_id
+        )
+
         if not enrollment:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Enrollment not found",
             )
-        
+
         # Check if user owns this enrollment
         if enrollment.user_id != user_id:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Not authorized to cancel this enrollment",
             )
-        
+
         # Can only cancel if not completed
         if enrollment.status == EnrollmentStatus.COMPLETED:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Cannot cancel completed enrollment",
             )
-        
+
         enrollment.status = EnrollmentStatus.CANCELLED
         await self.enrollment_repository.update_enrollment(enrollment)
 
@@ -184,23 +199,25 @@ class EnrollmentService:
     ) -> PaginatedEnrollmentResponse:
         """Get enrollments for a course (instructor only)."""
         # TODO: Verify instructor owns the course via Course Service
-        
+
         if page < 1:
             page = 1
         if page_size < 1 or page_size > 100:
             page_size = 10
-        
+
         skip = (page - 1) * page_size
-        
+
         # Get enrollments and total count
         enrollments = await self.enrollment_repository.get_course_enrollments(
             course_id, skip=skip, limit=page_size, status=status_filter
         )
-        total = await self.enrollment_repository.count_course_enrollments(course_id, status=status_filter)
-        
+        total = await self.enrollment_repository.count_course_enrollments(
+            course_id, status=status_filter
+        )
+
         # Calculate total pages
         total_pages = math.ceil(total / page_size)
-        
+
         return PaginatedEnrollmentResponse(
             items=[EnrollmentResponse.model_validate(e) for e in enrollments],
             total=total,

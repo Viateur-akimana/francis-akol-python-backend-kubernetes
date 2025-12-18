@@ -50,7 +50,11 @@ async def health_check():
     """Health check endpoint for container orchestration."""
     return JSONResponse(
         status_code=200,
-        content={"status": "healthy", "service": "enrollment-service", "version": "1.0.0"},
+        content={
+            "status": "healthy",
+            "service": "enrollment-service",
+            "version": "1.0.0",
+        },
     )
 
 
