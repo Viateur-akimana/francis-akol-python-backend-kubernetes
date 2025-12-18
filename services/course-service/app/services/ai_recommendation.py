@@ -4,9 +4,8 @@ import json
 from typing import List, Optional
 
 import httpx
-from pydantic import BaseModel
-
 from app.core.config import settings
+from pydantic import BaseModel
 
 
 class CourseRecommendation(BaseModel):

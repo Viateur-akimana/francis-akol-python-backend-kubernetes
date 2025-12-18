@@ -2,11 +2,10 @@
 
 from typing import List, Optional
 
+from app.services.file_storage import file_storage_service
 from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-
-from app.services.file_storage import file_storage_service
 
 router = APIRouter(prefix="/files", tags=["Files"])
 

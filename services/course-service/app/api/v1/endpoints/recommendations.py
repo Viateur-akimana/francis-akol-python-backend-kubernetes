@@ -2,15 +2,14 @@
 
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
-
+from app.db.session import async_session
 from app.repositories.course_repository import CourseRepository
 from app.services.ai_recommendation import (
     CourseRecommendation,
     recommendation_service,
 )
-from app.db.session import async_session
+from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 router = APIRouter(prefix="/recommendations", tags=["Recommendations"])
 
