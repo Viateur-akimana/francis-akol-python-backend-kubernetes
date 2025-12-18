@@ -6,12 +6,21 @@ This directory contains comprehensive tests for all MLH microservices.
 
 ```
 tests/
-├── services/
-│   ├── user-service/tests/        # User authentication & profile tests
-│   ├── course-service/tests/      # Course CRUD & caching tests
-│   ├── enrollment-service/tests/  # Enrollment workflow tests
-│   └── payment-service/tests/     # Payment processing tests
+├── integration/                    # End-to-end integration tests
+│   ├── conftest.py                 # Shared fixtures (service clients, test users)
+│   ├── test_auth_flow.py           # JWT auth, RBAC, cross-service auth
+│   ├── test_enrollment_flow.py     # Full enrollment flow, quota, concurrency
+│   └── test_cache_integration.py   # Redis cache behavior
+├── performance/                    # Load and performance tests
+│   ├── locustfile.py               # Locust load test definitions
+│   └── README.md                   # Performance test guide
+└── services/
+    ├── user-service/tests/         # User authentication & profile tests
+    ├── course-service/tests/       # Course CRUD & caching tests
+    ├── enrollment-service/tests/   # Enrollment workflow tests
+    └── payment-service/tests/      # Payment processing tests
 ```
+
 
 ## Prerequisites
 
