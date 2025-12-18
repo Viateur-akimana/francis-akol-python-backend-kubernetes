@@ -134,6 +134,7 @@ def cancel_expired_pending_enrollments() -> dict:
     """
     import asyncio
     from datetime import datetime, timedelta
+
     from sqlalchemy import and_, select
 
     async def _cancel():
