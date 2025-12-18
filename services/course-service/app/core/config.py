@@ -39,6 +39,10 @@ class Settings(BaseSettings):
     # User Service
     USER_SERVICE_URL: str = "http://localhost:8001"
 
+    # OpenAI for AI Recommendations
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-3.5-turbo"
+
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=True, extra="allow"
     )
