@@ -4,7 +4,7 @@ import httpx
 from app.core.celery_app import celery_app
 from app.core.config import settings
 from app.db.session import async_session
-from app.models.enrollment import EnrollmentStatus
+from app.models.enrollment import Enrollment, EnrollmentStatus
 from app.repositories.enrollment_repository import EnrollmentRepository
 
 
