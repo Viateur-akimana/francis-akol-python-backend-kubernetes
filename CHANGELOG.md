@@ -332,11 +332,11 @@ service-name/
 - [ ] Automate in CI
 
 ### Performance/Load Tests (Locust)
-- [ ] User signup/login load
-- [ ] Course listing under load
-- [ ] Concurrent enrollments
-- [ ] Payment processing under load
-- [ ] Benchmarks: p95 < 200ms, 100 concurrent users, 1000 req/sec
+- [x] User signup/login load
+- [x] Course listing under load
+- [x] Concurrent enrollments
+- [x] Payment processing under load
+- [x] Benchmarks: p95 < 200ms, 100 concurrent users, 1000 req/sec
 
 ### Edge Cases
 - [ ] Enrollment quota exceeded (concurrent requests)
@@ -360,20 +360,20 @@ service-name/
 - [ ] Sanitize sensitive data
 
 ### Prometheus Metrics
-- [ ] Install prometheus-fastapi-instrumentator
-- [ ] Define metrics:
+- [x] Install prometheus-fastapi-instrumentator
+- [x] Define metrics:
   - **Counters:** api_requests_total, enrollments_created, payments_processed, cache_hits/misses
   - **Gauges:** active_users, courses_count, enrollments_pending
   - **Histograms:** api_request_duration, db_query_duration, celery_task_duration
-- [ ] Expose `/metrics` endpoint per service
+- [x] Expose `/metrics` endpoint per service
 
 ### Grafana Dashboards
-- [ ] Setup Grafana in docker-compose
-- [ ] Create dashboards:
+- [x] Setup Grafana in docker-compose
+- [x] Create dashboards:
   - **Service Health:** Request rate, error rate, response time (p50/p95/p99), uptime
   - **Business Metrics:** Enrollments/day, revenue, top courses, user growth
   - **Infrastructure:** CPU/Memory, DB pool, Redis hit rate, Celery queue
-- [ ] Export dashboard JSONs to `/monitoring/grafana-dashboards/`
+- [x] Export dashboard JSONs to `/monitoring/grafana-dashboards/`
 
 ### Health Checks
 - [x] `/health` (liveness), `/ready` (readiness - DB/Redis)
@@ -435,16 +435,16 @@ service-name/
 
 ### PR #11: AI Recommendations (Optional)
 **Branch:** `feature/ai-recommendation-engine`
-- [ ] Collect enrollment history + interactions
-- [ ] Train model (collaborative/content-based filtering with scikit-learn)
-- [ ] Create `/api/v1/recommendations/` endpoint
-- [ ] Cache recommendations, A/B testing
+- [x] Collect enrollment history + interactions
+- [x] Train model (collaborative/content-based filtering with scikit-learn)
+- [x] Create `/api/v1/recommendations/` endpoint
+- [x] Cache recommendations, A/B testing
 
 ### PR #12: File Upload (Optional)
 **Branch:** `feature/file-upload-service`
 - [ ] MinIO setup (S3-compatible)
-- [ ] Upload endpoints (course materials, avatars)
-- [ ] File validation, pre-signed URLs
+- [x] Upload endpoints (course materials, avatars)
+- [x] File validation, pre-signed URLs
 - [ ] Virus scanning (ClamAV)
 
 ### PR #13: OpenAI Integration (Optional)
