@@ -55,7 +55,9 @@ class AIRecommendationService:
         """
         if not self.api_key:
             # Fallback to simple keyword matching if no API key
-            return self._fallback_recommendations(prompt, available_courses, max_results)
+            return self._fallback_recommendations(
+                prompt, available_courses, max_results
+            )
 
         # Build the system prompt
         system_prompt = self._build_system_prompt(available_courses)
@@ -93,7 +95,9 @@ class AIRecommendationService:
 
         except Exception:
             # Fallback on any error
-            return self._fallback_recommendations(prompt, available_courses, max_results)
+            return self._fallback_recommendations(
+                prompt, available_courses, max_results
+            )
 
     def _build_system_prompt(self, courses: List[dict]) -> str:
         """Build the system prompt with available courses."""

@@ -16,11 +16,30 @@ class FileStorageService:
     """Service for handling file uploads and storage."""
 
     ALLOWED_EXTENSIONS = {
-        "pdf", "doc", "docx", "ppt", "pptx", "xls", "xlsx",
-        "txt", "md", "csv", "json",
-        "jpg", "jpeg", "png", "gif", "webp", "svg",
-        "mp4", "webm", "mp3", "wav",
-        "zip", "tar", "gz"
+        "pdf",
+        "doc",
+        "docx",
+        "ppt",
+        "pptx",
+        "xls",
+        "xlsx",
+        "txt",
+        "md",
+        "csv",
+        "json",
+        "jpg",
+        "jpeg",
+        "png",
+        "gif",
+        "webp",
+        "svg",
+        "mp4",
+        "webm",
+        "mp3",
+        "wav",
+        "zip",
+        "tar",
+        "gz",
     }
 
     MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
@@ -52,7 +71,7 @@ class FileStorageService:
         if extension not in self.ALLOWED_EXTENSIONS:
             raise HTTPException(
                 status_code=400,
-                detail=f"File type '{extension}' not allowed. Allowed: {', '.join(sorted(self.ALLOWED_EXTENSIONS))}"
+                detail=f"File type '{extension}' not allowed. Allowed: {', '.join(sorted(self.ALLOWED_EXTENSIONS))}",
             )
 
         return extension, file.content_type or "application/octet-stream"
@@ -62,7 +81,9 @@ class FileStorageService:
         extension = self._get_file_extension(original_filename)
         unique_id = uuid.uuid4().hex[:8]
         timestamp = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
-        safe_name = "".join(c for c in original_filename.rsplit(".", 1)[0] if c.isalnum() or c in "-_")[:50]
+        safe_name = "".join(
+            c for c in original_filename.rsplit(".", 1)[0] if c.isalnum() or c in "-_"
+        )[:50]
         return f"{timestamp}_{unique_id}_{safe_name}.{extension}"
 
     def _get_file_hash(self, content: bytes) -> str:
@@ -74,7 +95,7 @@ class FileStorageService:
         file: UploadFile,
         course_id: int,
         user_id: int,
-        category: str = "materials"
+        category: str = "materials",
     ) -> dict:
         """
         Upload a file for a course.
@@ -98,7 +119,7 @@ class FileStorageService:
         if len(content) > self.MAX_FILE_SIZE:
             raise HTTPException(
                 status_code=400,
-                detail=f"File too large. Maximum size is {self.MAX_FILE_SIZE // (1024*1024)}MB"
+                detail=f"File too large. Maximum size is {self.MAX_FILE_SIZE // (1024*1024)}MB",
             )
 
         # Generate unique filename
@@ -127,14 +148,11 @@ class FileStorageService:
             "course_id": course_id,
             "uploaded_by": user_id,
             "uploaded_at": datetime.utcnow().isoformat(),
-            "url": f"/api/v1/files/{course_id}/{category}/{unique_filename}"
+            "url": f"/api/v1/files/{course_id}/{category}/{unique_filename}",
         }
 
     async def get_file(
-        self,
-        course_id: int,
-        category: str,
-        filename: str
+        self, course_id: int, category: str, filename: str
     ) -> Tuple[Path, str]:
         """
         Get a file path and content type.
@@ -164,12 +182,7 @@ class FileStorageService:
 
         return file_path, content_type
 
-    async def delete_file(
-        self,
-        course_id: int,
-        category: str,
-        filename: str
-    ) -> bool:
+    async def delete_file(self, course_id: int, category: str, filename: str) -> bool:
         """Delete a file."""
         file_path = self.storage_path / str(course_id) / category / filename
 
@@ -179,11 +192,7 @@ class FileStorageService:
         os.remove(file_path)
         return True
 
-    async def list_files(
-        self,
-        course_id: int,
-        category: Optional[str] = None
-    ) -> list:
+    async def list_files(self, course_id: int, category: Optional[str] = None) -> list:
         """List all files for a course."""
         course_dir = self.storage_path / str(course_id)
 
@@ -199,12 +208,16 @@ class FileStorageService:
         for file_path in search_path.rglob("*"):
             if file_path.is_file():
                 rel_path = file_path.relative_to(self.storage_path)
-                files.append({
-                    "filename": file_path.name,
-                    "path": str(rel_path),
-                    "size": file_path.stat().st_size,
-                    "modified_at": datetime.fromtimestamp(file_path.stat().st_mtime).isoformat()
-                })
+                files.append(
+                    {
+                        "filename": file_path.name,
+                        "path": str(rel_path),
+                        "size": file_path.stat().st_size,
+                        "modified_at": datetime.fromtimestamp(
+                            file_path.stat().st_mtime
+                        ).isoformat(),
+                    }
+                )
 
         return files
 
