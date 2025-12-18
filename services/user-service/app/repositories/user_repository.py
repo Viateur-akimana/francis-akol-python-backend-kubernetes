@@ -16,7 +16,11 @@ class UserRepository:
         self.db = db
 
     async def create_user(
-        self, email: str, username: str, hashed_password: str, role: UserRole = UserRole.STUDENT
+        self,
+        email: str,
+        username: str,
+        hashed_password: str,
+        role: UserRole = UserRole.STUDENT,
     ) -> User:
         """Create a new user."""
         user = User(
@@ -44,11 +48,15 @@ class UserRepository:
     async def get_user_by_username(self, username: str) -> Optional[User]:
         """Get user by username with profile."""
         result = await self.db.execute(
-            select(User).options(selectinload(User.profile)).where(User.username == username)
+            select(User)
+            .options(selectinload(User.profile))
+            .where(User.username == username)
         )
         return result.scalar_one_or_none()
 
-    async def get_user_by_email_or_username(self, email: str, username: str) -> Optional[User]:
+    async def get_user_by_email_or_username(
+        self, email: str, username: str
+    ) -> Optional[User]:
         """Get user by email or username."""
         result = await self.db.execute(
             select(User).where(or_(User.email == email, User.username == username))
@@ -59,7 +67,9 @@ class UserRepository:
         self, skip: int = 0, limit: int = 100, role: Optional[UserRole] = None
     ) -> list[User]:
         """Get list of users with pagination and optional role filter."""
-        query = select(User).options(selectinload(User.profile)).offset(skip).limit(limit)
+        query = (
+            select(User).options(selectinload(User.profile)).offset(skip).limit(limit)
+        )
 
         if role:
             query = query.where(User.role == role)
@@ -98,7 +108,9 @@ class UserRepository:
 
     async def get_profile_by_user_id(self, user_id: int) -> Optional[Profile]:
         """Get profile by user ID."""
-        result = await self.db.execute(select(Profile).where(Profile.user_id == user_id))
+        result = await self.db.execute(
+            select(Profile).where(Profile.user_id == user_id)
+        )
         return result.scalar_one_or_none()
 
     async def update_profile(self, profile: Profile) -> Profile:

@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "payment-service"
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://payment_user:payment_password@localhost:5432/payment_service_db"
+    DATABASE_URL: str = (
+        "postgresql+asyncpg://payment_user:payment_password@localhost:5432/payment_service_db"
+    )
     DB_POOL_SIZE: int = 20
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_TIMEOUT: int = 30
@@ -41,7 +43,9 @@ class Settings(BaseSettings):
     STRIPE_PUBLISHABLE_KEY: str = "pk_test_mock_key"
     STRIPE_WEBHOOK_SECRET: str = "whsec_test_mock_secret"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
+    model_config = SettingsConfigDict(
+        env_file=".env", case_sensitive=True, extra="allow"
+    )
 
 
 settings = Settings()

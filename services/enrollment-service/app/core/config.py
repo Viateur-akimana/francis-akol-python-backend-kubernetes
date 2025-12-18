@@ -15,7 +15,9 @@ class Settings(BaseSettings):
     SERVICE_NAME: str = "enrollment-service"
 
     # Database
-    DATABASE_URL: str = "postgresql+asyncpg://enrollment_user:enrollment_password@localhost:5432/enrollment_service_db"
+    DATABASE_URL: str = (
+        "postgresql+asyncpg://enrollment_user:enrollment_password@localhost:5432/enrollment_service_db"
+    )
     DB_POOL_SIZE: int = 20
     DB_MAX_OVERFLOW: int = 10
     DB_POOL_TIMEOUT: int = 30
@@ -42,7 +44,9 @@ class Settings(BaseSettings):
     USER_SERVICE_URL: str = "http://localhost:8001"
     COURSE_SERVICE_URL: str = "http://localhost:8002"
 
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True, extra="allow")
+    model_config = SettingsConfigDict(
+        env_file=".env", case_sensitive=True, extra="allow"
+    )
 
 
 settings = Settings()

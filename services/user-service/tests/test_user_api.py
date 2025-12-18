@@ -4,7 +4,12 @@ import pytest
 from httpx import AsyncClient
 
 
-async def create_test_user(client: AsyncClient, email: str = "test@example.com", username: str = "testuser", role: str = "student"):
+async def create_test_user(
+    client: AsyncClient,
+    email: str = "test@example.com",
+    username: str = "testuser",
+    role: str = "student",
+):
     """Helper function to create a test user and return tokens."""
     response = await client.post(
         "/api/v1/auth/signup",
@@ -129,7 +134,9 @@ async def test_delete_user_admin_only(client: AsyncClient):
     user, access_token = await create_test_user(client)
 
     # Create another user to try to delete
-    user2, _ = await create_test_user(client, email="user2@example.com", username="user2")
+    user2, _ = await create_test_user(
+        client, email="user2@example.com", username="user2"
+    )
 
     response = await client.delete(
         f"/api/v1/users/{user2['id']}",

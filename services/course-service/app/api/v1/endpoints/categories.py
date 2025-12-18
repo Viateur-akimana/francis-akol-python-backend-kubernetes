@@ -29,7 +29,10 @@ async def create_category(
     existing = await course_repository.get_category_by_slug(slug)
     if existing:
         from fastapi import HTTPException
-        raise HTTPException(status_code=400, detail="Category with this name already exists")
+
+        raise HTTPException(
+            status_code=400, detail="Category with this name already exists"
+        )
 
     category = await course_repository.create_category(
         {**category_data.model_dump(), "slug": slug}
@@ -58,6 +61,7 @@ async def get_category(
 
     if not category:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Category not found")
 
     return CategoryResponse.model_validate(category)

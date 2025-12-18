@@ -21,7 +21,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter()
 
 
-@router.post("/", response_model=PaymentIntentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/", response_model=PaymentIntentResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_payment_intent(
     payment_data: PaymentIntentCreate,
     x_user_id: int = Header(..., description="User ID from auth service"),
@@ -29,13 +31,13 @@ async def create_payment_intent(
 ):
     """
     Create payment intent for course enrollment.
-    
+
     Steps:
     1. Retrieves course price from Course Service
     2. Validates user hasn't already paid
     3. Creates payment intent via payment gateway
     4. Returns client_secret for frontend payment form
-    
+
     - **course_id**: Course ID to purchase
     - **payment_method**: Payment method (credit_card, paypal, etc.)
     - **currency**: Currency code (default: USD)
@@ -54,12 +56,12 @@ async def confirm_payment(
 ):
     """
     Confirm payment after client-side processing.
-    
+
     After user completes payment on frontend:
     1. Confirms payment with gateway
     2. Updates payment status (COMPLETED or FAILED)
     3. Creates enrollment if successful
-    
+
     - **payment_id**: Payment ID to confirm
     - **payment_intent_id**: Payment intent ID from gateway
     """
@@ -80,7 +82,7 @@ async def get_user_payments(
 ):
     """
     Get current user's payments (paginated).
-    
+
     - **page**: Page number
     - **page_size**: Items per page
     - **status**: Filter by status (PENDING, COMPLETED, FAILED, REFUNDED)
@@ -99,7 +101,7 @@ async def get_payment_stats(
 ):
     """
     Get payment statistics for current user.
-    
+
     Returns:
     - Total payments and amount
     - Completed/Pending/Failed/Refunded counts
@@ -118,7 +120,7 @@ async def get_payment(
 ):
     """
     Get payment by ID.
-    
+
     - **payment_id**: Payment ID
     """
     payment_repository = PaymentRepository(db)
@@ -135,9 +137,9 @@ async def refund_payment(
 ):
     """
     Refund a payment (admin only).
-    
+
     Processes refund via payment gateway and updates status.
-    
+
     - **payment_id**: Payment ID to refund
     - **reason**: Refund reason (optional)
     """

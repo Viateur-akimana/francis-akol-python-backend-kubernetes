@@ -114,7 +114,9 @@ async def get_user_by_id(
     return await user_service.get_user_by_id(user_id)
 
 
-@router.delete("/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK)
+@router.delete(
+    "/{user_id}", response_model=MessageResponse, status_code=status.HTTP_200_OK
+)
 async def delete_user(
     user_id: int,
     current_user: User = Depends(require_role([UserRole.ADMIN])),

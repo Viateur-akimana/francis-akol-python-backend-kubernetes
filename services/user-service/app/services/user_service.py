@@ -52,7 +52,9 @@ class UserService:
 
         # Check if email is being updated and if it's already taken
         if update_data.email and update_data.email != user.email:
-            existing_user = await self.user_repository.get_user_by_email(update_data.email)
+            existing_user = await self.user_repository.get_user_by_email(
+                update_data.email
+            )
             if existing_user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -62,7 +64,9 @@ class UserService:
 
         # Check if username is being updated and if it's already taken
         if update_data.username and update_data.username != user.username:
-            existing_user = await self.user_repository.get_user_by_username(update_data.username)
+            existing_user = await self.user_repository.get_user_by_username(
+                update_data.username
+            )
             if existing_user:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -118,7 +122,9 @@ class UserService:
         skip = (page - 1) * page_size
 
         # Get users and total count
-        users = await self.user_repository.get_users(skip=skip, limit=page_size, role=role)
+        users = await self.user_repository.get_users(
+            skip=skip, limit=page_size, role=role
+        )
         total = await self.user_repository.count_users(role=role)
 
         # Calculate total pages

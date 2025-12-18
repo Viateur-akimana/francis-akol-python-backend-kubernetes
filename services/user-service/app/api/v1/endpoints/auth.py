@@ -17,7 +17,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 router = APIRouter()
 
 
-@router.post("/signup", response_model=LoginResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/signup", response_model=LoginResponse, status_code=status.HTTP_201_CREATED
+)
 async def signup(
     signup_data: UserSignupRequest,
     db: AsyncSession = Depends(get_db),

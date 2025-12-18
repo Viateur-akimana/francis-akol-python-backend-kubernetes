@@ -12,7 +12,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 # Test database URL
-TEST_DATABASE_URL = settings.DATABASE_URL.replace("/user_service_db", "/user_service_test_db")
+TEST_DATABASE_URL = settings.DATABASE_URL.replace(
+    "/user_service_db", "/user_service_test_db"
+)
 
 # Create async engine for tests
 test_engine = create_async_engine(TEST_DATABASE_URL, echo=False, future=True)
