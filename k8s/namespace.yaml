@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mlh-platform
+  labels:
+    app.kubernetes.io/name: mlh-platform
+    app.kubernetes.io/part-of: modular-learning-hub
