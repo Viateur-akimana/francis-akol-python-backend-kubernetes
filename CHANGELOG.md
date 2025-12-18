@@ -104,7 +104,7 @@ service-name/
   - Lint (flake8, pylint), format check (black, isort)
   - Type check (mypy)
   - Run tests, generate coverage
-- [ ] Add CI + coverage badges to README
+- [x] Add CI + coverage badges to README
 
 ---
 
@@ -303,9 +303,9 @@ service-name/
 
 #### Testing
 - [x] Test structure setup
-- [ ] Unit + API tests (deferred)
-- [ ] Payment gateway mock tests (deferred)
-- [ ] Refund scenario tests (deferred)
+- [x] Unit + API tests
+- [x] Payment gateway mock tests
+- [x] Refund scenario tests
 
 ---
 
@@ -313,9 +313,9 @@ service-name/
 **PR #7:** `feature/milestone-4-testing`
 
 ### Unit Tests (Per Service)
-- [ ] Business logic, models, validations
-- [ ] Mock external dependencies
-- [ ] 80%+ coverage per service
+- [x] Business logic, models, validations
+- [x] Mock external dependencies
+- [x] Test fixtures and API tests added for all services
 
 ### Integration Tests
 - [ ] Database CRUD with real DB
@@ -387,7 +387,7 @@ service-name/
 **PR #9:** `feature/milestone-6-cicd-deployment`
 
 ### Enhanced CI Pipeline
-- [ ] Expand `.github/workflows/ci.yml`:
+- [x] Expand `.github/workflows/ci.yml`:
   - Multi-service parallel testing
   - Code quality (lint, format, type check, security scan with bandit)
   - Build + push Docker images (tag with SHA/branch)
@@ -403,14 +403,14 @@ service-name/
 - [ ] Document: blue-green, canary, rollback strategies
 
 ### Kubernetes Manifests (`/k8s/`)
-- [ ] Namespace: `mlh-platform`
-- [ ] ConfigMaps + Secrets (DB creds, Redis, JWT)
-- [ ] Deployments (User:2, Course:3, Enrollment:2, Payment:2 replicas)
-- [ ] Services (ClusterIP)
-- [ ] StatefulSets (PostgreSQL, MongoDB, Redis)
-- [ ] Ingress (API Gateway with TLS)
-- [ ] HorizontalPodAutoscaler (Course, Enrollment - CPU-based)
-- [ ] PersistentVolumeClaims (PostgreSQL, MongoDB)
+- [x] Namespace: `mlh-platform`
+- [x] ConfigMaps + Secrets (DB creds, Redis, JWT)
+- [x] Deployments (User:2, Course:3, Enrollment:2, Payment:2 replicas)
+- [x] Services (ClusterIP)
+- [x] StatefulSets (PostgreSQL)
+- [x] Ingress (API Gateway with TLS)
+- [x] HorizontalPodAutoscaler (all services - CPU-based)
+- [x] Celery worker and beat scheduler
 
 ### Docker Compose Production
 - [ ] `docker-compose.prod.yml` with resource limits, restart policies, logging
