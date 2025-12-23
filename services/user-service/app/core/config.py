@@ -1,7 +1,9 @@
 """Configuration settings for User Service."""
 
-from typing import List
+import json
+from typing import Any, List, Union
 
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -35,11 +37,30 @@ class Settings(BaseSettings):
     # Security
     BCRYPT_ROUNDS: int = 12
 
-    # CORS
-    CORS_ORIGINS: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    # CORS - use Any to prevent pydantic-settings from failing on parsing
+    CORS_ORIGINS: Any = ["http://localhost:3000", "http://localhost:8080"]
 
     # Logging
     LOG_LEVEL: str = "INFO"
+
+    @field_validator("CORS_ORIGINS", mode="before")
+    @classmethod
+    def parse_cors_origins(cls, v: Any) -> List[str]:
+        """Parse CORS_ORIGINS from various formats."""
+        if v is None:
+            return ["http://localhost:3000", "http://localhost:8080"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            # Try JSON first
+            if v.startswith("["):
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
+            # Otherwise comma-separated
+            return [origin.strip() for origin in v.split(",") if origin.strip()]
+        return ["http://localhost:3000", "http://localhost:8080"]
 
     model_config = SettingsConfigDict(
         env_file=".env", case_sensitive=True, extra="ignore"
@@ -48,3 +69,5 @@ class Settings(BaseSettings):
 
 # Create settings instance
 settings = Settings()
+
+

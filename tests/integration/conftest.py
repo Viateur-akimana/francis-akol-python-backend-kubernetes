@@ -13,6 +13,9 @@ import httpx
 import pytest
 import pytest_asyncio
 
+# Configure pytest-asyncio
+pytest_plugins = ("pytest_asyncio",)
+
 # Service URLs (from docker-compose)
 USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://localhost:8001")
 COURSE_SERVICE_URL = os.getenv("COURSE_SERVICE_URL", "http://localhost:8002")
@@ -20,22 +23,23 @@ ENROLLMENT_SERVICE_URL = os.getenv("ENROLLMENT_SERVICE_URL", "http://localhost:8
 PAYMENT_SERVICE_URL = os.getenv("PAYMENT_SERVICE_URL", "http://localhost:8004")
 
 
-@pytest.fixture(scope="session")
-def event_loop() -> Generator:
-    """Create an instance of the default event loop for the test session."""
-    loop = asyncio.get_event_loop_policy().new_event_loop()
+@pytest.fixture(scope="function")
+def event_loop():
+    """Create a new event loop for each test function."""
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     yield loop
     loop.close()
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def http_client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """Create a shared async HTTP client for all tests."""
     async with httpx.AsyncClient(timeout=30.0) as client:
         yield client
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def user_client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """HTTP client configured for User Service."""
     async with httpx.AsyncClient(
@@ -45,7 +49,7 @@ async def user_client() -> AsyncGenerator[httpx.AsyncClient, None]:
         yield client
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def course_client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """HTTP client configured for Course Service."""
     async with httpx.AsyncClient(
@@ -55,7 +59,7 @@ async def course_client() -> AsyncGenerator[httpx.AsyncClient, None]:
         yield client
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def enrollment_client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """HTTP client configured for Enrollment Service."""
     async with httpx.AsyncClient(
@@ -65,7 +69,7 @@ async def enrollment_client() -> AsyncGenerator[httpx.AsyncClient, None]:
         yield client
 
 
-@pytest_asyncio.fixture(scope="session")
+@pytest_asyncio.fixture(scope="function")
 async def payment_client() -> AsyncGenerator[httpx.AsyncClient, None]:
     """HTTP client configured for Payment Service."""
     async with httpx.AsyncClient(
@@ -85,7 +89,7 @@ async def test_user(user_client: httpx.AsyncClient) -> AsyncGenerator[Dict, None
         "email": f"testuser_{unique_id}@example.com",
         "username": f"testuser_{unique_id}",
         "password": "TestPassword123!",
-        "role": "STUDENT",
+        "role": "student",
     }
 
     # Register user
@@ -126,7 +130,7 @@ async def test_instructor(user_client: httpx.AsyncClient) -> AsyncGenerator[Dict
         "email": f"instructor_{unique_id}@example.com",
         "username": f"instructor_{unique_id}",
         "password": "InstructorPass123!",
-        "role": "INSTRUCTOR",
+        "role": "instructor",
     }
 
     # Register instructor
@@ -180,13 +184,17 @@ async def test_course(
         pytest.skip(f"Could not create test course: {response.text}")
 
 
-def auth_headers(token: str) -> Dict[str, str]:
+def get_auth_headers(token: str) -> Dict[str, str]:
     """Generate authorization headers."""
     return {"Authorization": f"Bearer {token}"}
 
 
+# Export as module-level for imports
+auth_headers = get_auth_headers
+
+
 # Service health check fixture
-@pytest_asyncio.fixture(scope="session", autouse=True)
+@pytest_asyncio.fixture(scope="function", autouse=True)
 async def check_services_health(http_client: httpx.AsyncClient):
     """Check that all services are healthy before running tests."""
     services = [
@@ -196,12 +204,20 @@ async def check_services_health(http_client: httpx.AsyncClient):
         (PAYMENT_SERVICE_URL, "Payment Service"),
     ]
 
+    unhealthy_services = []
     for url, name in services:
         try:
-            response = await http_client.get(f"{url}/health")
+            response = await http_client.get(f"{url}/health", timeout=5.0)
             if response.status_code != 200:
-                pytest.skip(f"{name} is not healthy: {response.status_code}")
-        except httpx.ConnectError:
-            pytest.skip(
-                f"{name} is not reachable at {url}. Start services with docker-compose."
-            )
+                unhealthy_services.append(f"{name} (status: {response.status_code})")
+        except (httpx.ConnectError, httpx.ReadError, httpx.TimeoutException) as e:
+            unhealthy_services.append(f"{name} ({type(e).__name__})")
+        except Exception as e:
+            unhealthy_services.append(f"{name} ({type(e).__name__}: {e})")
+
+    if unhealthy_services:
+        pytest.skip(
+            f"Services not available: {', '.join(unhealthy_services)}. "
+            "Start services with 'docker-compose up -d'"
+        )
+

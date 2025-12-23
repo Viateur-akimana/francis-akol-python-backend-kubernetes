@@ -10,10 +10,15 @@ Tests the complete enrollment flow including:
 """
 
 import asyncio
+from typing import Dict
 
 import httpx
 import pytest
-from conftest import auth_headers
+
+
+def auth_headers(token: str) -> Dict[str, str]:
+    """Generate authorization headers."""
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.mark.asyncio
@@ -160,7 +165,7 @@ class TestEnrollmentQuota:
                 "email": f"quota_student_{unique_id}@example.com",
                 "username": f"quota_student_{unique_id}",
                 "password": "QuotaPass123!",
-                "role": "STUDENT",
+                "role": "student",
             }
             response = await user_client.post("/api/v1/auth/signup", json=student_data)
             if response.status_code == 201:
@@ -239,7 +244,7 @@ class TestConcurrentEnrollment:
                 "email": f"concurrent_student_{unique_id}@example.com",
                 "username": f"concurrent_student_{unique_id}",
                 "password": "ConcurrentPass123!",
-                "role": "STUDENT",
+                "role": "student",
             }
             response = await user_client.post("/api/v1/auth/signup", json=student_data)
             if response.status_code == 201:

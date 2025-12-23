@@ -9,10 +9,15 @@ Tests Redis caching behavior including:
 """
 
 import asyncio
+from typing import Dict
 
 import httpx
 import pytest
-from conftest import auth_headers
+
+
+def auth_headers(token: str) -> Dict[str, str]:
+    """Generate authorization headers."""
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.mark.asyncio

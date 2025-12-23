@@ -9,9 +9,15 @@ Tests the complete JWT authentication flow including:
 - Logout and token invalidation
 """
 
+from typing import Dict
+
 import httpx
 import pytest
-from conftest import auth_headers
+
+
+def auth_headers(token: str) -> Dict[str, str]:
+    """Generate authorization headers."""
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.mark.asyncio
@@ -27,7 +33,7 @@ class TestAuthenticationFlow:
             "email": f"newuser_{unique_id}@example.com",
             "username": f"newuser_{unique_id}",
             "password": "SecurePass123!",
-            "role": "STUDENT",
+            "role": "student",
         }
 
         # Register
