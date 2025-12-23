@@ -326,9 +326,9 @@ service-name/
 - [x] Docker Compose integration tests
 
 ### API Contract Tests
-- [ ] Postman collections
-- [ ] Happy paths + error scenarios
-- [ ] Auth/authz, input validation
+- [x] Postman collections
+- [x] Happy paths + error scenarios
+- [x] Auth/authz, input validation
 - [ ] Automate in CI
 
 ### Performance/Load Tests (Locust)
