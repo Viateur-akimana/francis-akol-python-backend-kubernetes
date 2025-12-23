@@ -11,15 +11,14 @@ import time
 import uuid
 from typing import Callable
 
-from fastapi import Request, Response
-from starlette.middleware.base import BaseHTTPMiddleware
-
 from app.core.logging import (
     get_correlation_id,
     log_request,
     logger,
     set_correlation_id,
 )
+from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class LoggingMiddleware(BaseHTTPMiddleware):
