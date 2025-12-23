@@ -318,15 +318,15 @@ service-name/
 - [x] Test fixtures and API tests added for all services
 
 ### Integration Tests
-- [ ] Database CRUD with real DB
-- [ ] Transactions/rollbacks
-- [ ] Inter-service communication
-- [ ] Full enrollment flow (Course→Enrollment→Payment)
-- [ ] Celery task processing
-- [ ] Docker Compose integration tests
+- [x] Database CRUD with real DB
+- [x] Transactions/rollbacks
+- [x] Inter-service communication
+- [x] Full enrollment flow (Course→Enrollment→Payment)
+- [x] Celery task processing
+- [x] Docker Compose integration tests
 
 ### API Contract Tests
-- [ ] Postman/Newman collections
+- [ ] Postman collections
 - [ ] Happy paths + error scenarios
 - [ ] Auth/authz, input validation
 - [ ] Automate in CI
