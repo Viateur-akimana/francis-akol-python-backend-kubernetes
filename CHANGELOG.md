@@ -339,11 +339,11 @@ service-name/
 - [x] Benchmarks: p95 < 200ms, 100 concurrent users, 1000 req/sec
 
 ### Edge Cases
-- [ ] Enrollment quota exceeded (concurrent requests)
-- [ ] Unauthorized access (admin endpoints, other users' data)
-- [ ] Payment failure → enrollment rollback
-- [ ] Celery retry mechanism
-- [ ] Redis cache expiration/fallback
+- [x] Enrollment quota exceeded (concurrent requests)
+- [x] Unauthorized access (admin endpoints, other users' data)
+- [x] Payment failure → enrollment rollback
+- [x] Celery retry mechanism
+- [x] Redis cache expiration/fallback
 
 ### Documentation
 - [x] `tests/README.md` (how to run, coverage, performance results)
@@ -395,7 +395,7 @@ service-name/
   - Coverage reports
 
 ### CD Pipeline
-- [ ] `.github/workflows/cd.yml`:
+- [x] `.github/workflows/cd.yml`:
   - Trigger on merge to `main`
   - Deploy to staging (mock/local)
   - Smoke tests
