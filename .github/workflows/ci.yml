@@ -181,13 +181,13 @@ jobs:
     
     - name: Set up Docker Compose
       run: |
-        docker-compose version
+        docker compose version
     
     - name: Start services
       run: |
-        docker-compose up -d postgres redis mongodb
+        docker compose up -d postgres redis mongodb
         sleep 10
-        docker-compose up -d user-service course-service enrollment-service payment-service
+        docker compose up -d user-service course-service enrollment-service payment-service
         sleep 15
     
     - name: Wait for services to be healthy
@@ -233,9 +233,9 @@ jobs:
     - name: Show service logs on failure
       if: failure()
       run: |
-        docker-compose logs --tail=50
+        docker compose logs --tail=50
     
     - name: Stop services
       if: always()
       run: |
-        docker-compose down -v
+        docker compose down -v
