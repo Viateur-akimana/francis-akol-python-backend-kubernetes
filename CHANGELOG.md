@@ -354,10 +354,10 @@ service-name/
 **PR #8:** `feature/milestone-5-observability`
 
 ### Structured Logging
-- [ ] Configure Loguru/Python logging (JSON format)
-- [ ] Log levels, correlation IDs, rotation
-- [ ] Log: API requests, service calls, business events, errors
-- [ ] Sanitize sensitive data
+- [x] Configure Loguru/Python logging (JSON format)
+- [x] Log levels, correlation IDs, rotation
+- [x] Log: API requests, service calls, business events, errors
+- [x] Sanitize sensitive data
 
 ### Prometheus Metrics
 - [x] Install prometheus-fastapi-instrumentator
