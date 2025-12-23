@@ -34,10 +34,11 @@ class PaymentService:
         Create a payment intent for course enrollment.
 
         Steps:
-        1. Verify course exists and get price
-        2. Check if user already paid for this course
-        3. Create payment intent via payment gateway
-        4. Store payment record in database
+        1. Check idempotency key for existing payment (prevents duplicates)
+        2. Verify course exists and get price
+        3. Check if user already paid for this course
+        4. Create payment intent via payment gateway
+        5. Store payment record in database
 
         Args:
             payment_data: Payment intent creation data
@@ -49,6 +50,24 @@ class PaymentService:
         Raises:
             HTTPException: If course not found or already paid
         """
+        # Check idempotency key for existing payment (prevents duplicates)
+        if payment_data.idempotency_key:
+            existing_payment = (
+                await self.payment_repository.get_payment_by_idempotency_key(
+                    payment_data.idempotency_key
+                )
+            )
+            if existing_payment:
+                # Return existing payment instead of creating duplicate
+                return PaymentIntentResponse(
+                    payment_id=existing_payment.id,
+                    payment_intent_id=existing_payment.payment_intent_id or "",
+                    amount=existing_payment.amount,
+                    currency=existing_payment.currency,
+                    status=existing_payment.status,
+                    client_secret=None,  # Client secret only available on first creation
+                )
+
         # Get course details from Course Service
         try:
             async with httpx.AsyncClient() as client:
@@ -114,6 +133,7 @@ class PaymentService:
                 "status": PaymentStatus.PENDING,
                 "payment_method": payment_data.payment_method,
                 "payment_intent_id": intent["id"],
+                "idempotency_key": payment_data.idempotency_key,
             }
         )
 

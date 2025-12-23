@@ -77,6 +77,9 @@ class Payment(Base, TimestampMixin):
     payment_intent_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, index=True
     )
+    idempotency_key: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True, index=True
+    )
     failure_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     refund_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     refunded_at: Mapped[Optional[datetime]] = mapped_column(

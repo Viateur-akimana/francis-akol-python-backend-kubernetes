@@ -44,6 +44,15 @@ class PaymentRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_payment_by_idempotency_key(
+        self, idempotency_key: str
+    ) -> Optional[Payment]:
+        """Get payment by idempotency key for duplicate prevention."""
+        result = await self.db.execute(
+            select(Payment).where(Payment.idempotency_key == idempotency_key)
+        )
+        return result.scalar_one_or_none()
+
     async def get_user_payments(
         self,
         user_id: int,

@@ -15,6 +15,11 @@ class PaymentIntentCreate(BaseModel):
     course_id: int = Field(..., gt=0)
     payment_method: PaymentMethod
     currency: str = Field(default="USD", pattern="^[A-Z]{3}$")
+    idempotency_key: Optional[str] = Field(
+        None,
+        max_length=255,
+        description="Unique key to prevent duplicate payments from retries",
+    )
 
 
 class PaymentConfirm(BaseModel):
@@ -42,6 +47,7 @@ class PaymentResponse(BaseModel):
     payment_method: PaymentMethod
     transaction_id: Optional[str]
     payment_intent_id: Optional[str]
+    idempotency_key: Optional[str]
     failure_reason: Optional[str]
     refund_reason: Optional[str]
     refunded_at: Optional[datetime]
