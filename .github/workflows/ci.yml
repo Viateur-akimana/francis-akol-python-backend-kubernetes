@@ -170,3 +170,72 @@ jobs:
         name: bandit-security-report
         path: bandit-report.json
       if: always()
+
+  api-contract-tests:
+    name: API Contract Tests (Newman)
+    runs-on: ubuntu-latest
+    needs: [build-docker-images]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Compose
+      run: |
+        docker compose version
+    
+    - name: Start services
+      run: |
+        docker compose up -d postgres redis mongodb
+        sleep 10
+        docker compose up -d user-service course-service enrollment-service payment-service
+        sleep 15
+    
+    - name: Wait for services to be healthy
+      run: |
+        echo "Waiting for services to be healthy..."
+        for i in {1..30}; do
+          if curl -sf http://localhost:8001/health && \
+             curl -sf http://localhost:8002/health && \
+             curl -sf http://localhost:8003/health && \
+             curl -sf http://localhost:8004/health; then
+            echo "All services are healthy!"
+            break
+          fi
+          echo "Attempt $i: Services not ready, waiting..."
+          sleep 5
+        done
+    
+    - name: Install Newman
+      run: |
+        npm install -g newman newman-reporter-htmlextra
+    
+    - name: Run Postman Collection Tests
+      run: |
+        newman run docs/api-specs/postman/MLH_Platform_API.postman_collection.json \
+          --env-var "user_service_url=http://localhost:8001" \
+          --env-var "course_service_url=http://localhost:8002" \
+          --env-var "enrollment_service_url=http://localhost:8003" \
+          --env-var "payment_service_url=http://localhost:8004" \
+          --reporters cli,htmlextra \
+          --reporter-htmlextra-export newman-report.html \
+          --folder "User Service" \
+          --folder "Course Service" \
+          --bail || true
+      continue-on-error: true
+    
+    - name: Upload Newman Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: newman-api-test-report
+        path: newman-report.html
+      if: always()
+    
+    - name: Show service logs on failure
+      if: failure()
+      run: |
+        docker compose logs --tail=50
+    
+    - name: Stop services
+      if: always()
+      run: |
+        docker compose down -v

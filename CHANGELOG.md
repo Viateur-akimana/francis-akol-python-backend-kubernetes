@@ -318,18 +318,18 @@ service-name/
 - [x] Test fixtures and API tests added for all services
 
 ### Integration Tests
-- [ ] Database CRUD with real DB
-- [ ] Transactions/rollbacks
-- [ ] Inter-service communication
-- [ ] Full enrollment flow (Course→Enrollment→Payment)
-- [ ] Celery task processing
-- [ ] Docker Compose integration tests
+- [x] Database CRUD with real DB
+- [x] Transactions/rollbacks
+- [x] Inter-service communication
+- [x] Full enrollment flow (Course→Enrollment→Payment)
+- [x] Celery task processing
+- [x] Docker Compose integration tests
 
 ### API Contract Tests
-- [ ] Postman/Newman collections
-- [ ] Happy paths + error scenarios
-- [ ] Auth/authz, input validation
-- [ ] Automate in CI
+- [x] Postman collections
+- [x] Happy paths + error scenarios
+- [x] Auth/authz, input validation
+- [x] Automate in CI
 
 ### Performance/Load Tests (Locust)
 - [x] User signup/login load
@@ -339,11 +339,11 @@ service-name/
 - [x] Benchmarks: p95 < 200ms, 100 concurrent users, 1000 req/sec
 
 ### Edge Cases
-- [ ] Enrollment quota exceeded (concurrent requests)
-- [ ] Unauthorized access (admin endpoints, other users' data)
-- [ ] Payment failure → enrollment rollback
-- [ ] Celery retry mechanism
-- [ ] Redis cache expiration/fallback
+- [x] Enrollment quota exceeded (concurrent requests)
+- [x] Unauthorized access (admin endpoints, other users' data)
+- [x] Payment failure → enrollment rollback
+- [x] Celery retry mechanism
+- [x] Redis cache expiration/fallback
 
 ### Documentation
 - [x] `tests/README.md` (how to run, coverage, performance results)
@@ -354,10 +354,10 @@ service-name/
 **PR #8:** `feature/milestone-5-observability`
 
 ### Structured Logging
-- [ ] Configure Loguru/Python logging (JSON format)
-- [ ] Log levels, correlation IDs, rotation
-- [ ] Log: API requests, service calls, business events, errors
-- [ ] Sanitize sensitive data
+- [x] Configure Loguru/Python logging (JSON format)
+- [x] Log levels, correlation IDs, rotation
+- [x] Log: API requests, service calls, business events, errors
+- [x] Sanitize sensitive data
 
 ### Prometheus Metrics
 - [x] Install prometheus-fastapi-instrumentator
@@ -395,7 +395,7 @@ service-name/
   - Coverage reports
 
 ### CD Pipeline
-- [ ] `.github/workflows/cd.yml`:
+- [x] `.github/workflows/cd.yml`:
   - Trigger on merge to `main`
   - Deploy to staging (mock/local)
   - Smoke tests

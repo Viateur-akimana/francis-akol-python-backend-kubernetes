@@ -1,0 +1,1717 @@
+{
+    "info": {
+        "_postman_id": "mlh-platform-api-collection",
+        "name": "MLH Platform API",
+        "description": "Modular Learning Hub Platform API Collection\n\nThis collection contains all API endpoints for the MLH microservices:\n- User Service (Authentication & User Management)\n- Course Service (Course Management & Caching)\n- Enrollment Service (Enrollment Processing)\n- Payment Service (Payment Processing)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "user_service_url",
+            "value": "http://localhost:8001",
+            "type": "string"
+        },
+        {
+            "key": "course_service_url",
+            "value": "http://localhost:8002",
+            "type": "string"
+        },
+        {
+            "key": "enrollment_service_url",
+            "value": "http://localhost:8003",
+            "type": "string"
+        },
+        {
+            "key": "payment_service_url",
+            "value": "http://localhost:8004",
+            "type": "string"
+        },
+        {
+            "key": "access_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "refresh_token",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "user_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "course_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "enrollment_id",
+            "value": "",
+            "type": "string"
+        },
+        {
+            "key": "payment_id",
+            "value": "",
+            "type": "string"
+        }
+    ],
+    "item": [
+        {
+            "name": "User Service",
+            "description": "Authentication and User Management endpoints",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{user_service_url}}/health",
+                            "host": [
+                                "{{user_service_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Auth",
+                    "item": [
+                        {
+                            "name": "Signup - Student",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 201', function () {",
+                                            "    pm.response.to.have.status(201);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has tokens', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData.tokens || jsonData).to.have.property('access_token');",
+                                            "    pm.expect(jsonData.tokens || jsonData).to.have.property('refresh_token');",
+                                            "});",
+                                            "",
+                                            "var jsonData = pm.response.json();",
+                                            "var tokens = jsonData.tokens || jsonData;",
+                                            "pm.collectionVariables.set('access_token', tokens.access_token);",
+                                            "pm.collectionVariables.set('refresh_token', tokens.refresh_token);",
+                                            "if (jsonData.user && jsonData.user.id) {",
+                                            "    pm.collectionVariables.set('user_id', jsonData.user.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"student_{{$timestamp}}@example.com\",\n    \"username\": \"student_{{$timestamp}}\",\n    \"password\": \"SecurePass123!\",\n    \"role\": \"student\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/signup",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "signup"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Signup - Instructor",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 201', function () {",
+                                            "    pm.response.to.have.status(201);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has tokens', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData.tokens || jsonData).to.have.property('access_token');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"instructor_{{$timestamp}}@example.com\",\n    \"username\": \"instructor_{{$timestamp}}\",\n    \"password\": \"SecurePass123!\",\n    \"role\": \"instructor\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/signup",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "signup"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Login",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has tokens', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    var tokens = jsonData.tokens || jsonData;",
+                                            "    pm.expect(tokens).to.have.property('access_token');",
+                                            "    pm.expect(tokens).to.have.property('refresh_token');",
+                                            "});",
+                                            "",
+                                            "var jsonData = pm.response.json();",
+                                            "var tokens = jsonData.tokens || jsonData;",
+                                            "pm.collectionVariables.set('access_token', tokens.access_token);",
+                                            "pm.collectionVariables.set('refresh_token', tokens.refresh_token);",
+                                            "if (jsonData.user && jsonData.user.id) {",
+                                            "    pm.collectionVariables.set('user_id', jsonData.user.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"SecurePass123!\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Refresh Token",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has new access token', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('access_token');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"refresh_token\": \"{{refresh_token}}\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/refresh",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "refresh"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Logout",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/logout",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "logout"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Users",
+                    "item": [
+                        {
+                            "name": "Get Current User",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has user data', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('email');",
+                                            "    pm.expect(jsonData).to.have.property('username');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/users/me",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "users",
+                                        "me"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Current User",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"username\": \"updated_username\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/users/me",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "users",
+                                        "me"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get All Users (Admin)",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/users/",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "users",
+                                        ""
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Error Cases",
+                    "item": [
+                        {
+                            "name": "Login - Invalid Credentials",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 401 or 400', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([400, 401]);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"invalid@example.com\",\n    \"password\": \"wrongpassword\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/login",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "login"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Protected Endpoint - No Token",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 401 or 403', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/users/me",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "users",
+                                        "me"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Protected Endpoint - Invalid Token",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 401 or 403', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([401, 403]);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer invalid_token_here"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/users/me",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "users",
+                                        "me"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Course Service",
+            "description": "Course Management endpoints with Redis caching",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{course_service_url}}/health",
+                            "host": [
+                                "{{course_service_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Courses",
+                    "item": [
+                        {
+                            "name": "Create Course",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 201', function () {",
+                                            "    pm.response.to.have.status(201);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has course data', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('id');",
+                                            "    pm.expect(jsonData).to.have.property('title');",
+                                            "    pm.collectionVariables.set('course_id', jsonData.id);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"title\": \"Introduction to Python {{$timestamp}}\",\n    \"description\": \"Learn Python programming from scratch\",\n    \"price\": 49.99,\n    \"max_students\": 100,\n    \"is_published\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List Courses",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has pagination', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('items');",
+                                            "    pm.expect(jsonData).to.have.property('total');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/?page=1&page_size=10",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "page",
+                                            "value": "1"
+                                        },
+                                        {
+                                            "key": "page_size",
+                                            "value": "10"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Course by ID",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "",
+                                            "pm.test('Response has course details', function () {",
+                                            "    var jsonData = pm.response.json();",
+                                            "    pm.expect(jsonData).to.have.property('id');",
+                                            "    pm.expect(jsonData).to.have.property('title');",
+                                            "    pm.expect(jsonData).to.have.property('description');",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/{{course_id}}",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        "{{course_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Course",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"description\": \"Updated course description\",\n    \"price\": 59.99\n}"
+                                },
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/{{course_id}}",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        "{{course_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Delete Course",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200 or 204', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/{{course_id}}",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        "{{course_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Course Content",
+                    "item": [
+                        {
+                            "name": "Create Course Content",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"title\": \"Module 1: Getting Started\",\n    \"content_type\": \"video\",\n    \"content_url\": \"https://example.com/video1.mp4\",\n    \"duration_minutes\": 30,\n    \"order\": 1,\n    \"is_preview\": true\n}"
+                                },
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/{{course_id}}/content",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        "{{course_id}}",
+                                        "content"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Course Contents",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/{{course_id}}/content",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        "{{course_id}}",
+                                        "content"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Search & Filter",
+                    "item": [
+                        {
+                            "name": "Search Courses",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/?search=python",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "search",
+                                            "value": "python"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Filter by Published",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/?is_published=true",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "is_published",
+                                            "value": "true"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Sort by Price",
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/?sort_by=price&sort_order=asc",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "sort_by",
+                                            "value": "price"
+                                        },
+                                        {
+                                            "key": "sort_order",
+                                            "value": "asc"
+                                        }
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Enrollment Service",
+            "description": "Enrollment Management with Celery async processing",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{enrollment_service_url}}/health",
+                            "host": [
+                                "{{enrollment_service_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Enrollments",
+                    "item": [
+                        {
+                            "name": "Create Enrollment",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 201 or 202', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+                                            "});",
+                                            "",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.id) {",
+                                            "    pm.collectionVariables.set('enrollment_id', jsonData.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"course_id\": {{course_id}}\n}"
+                                },
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List My Enrollments",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Enrollment by ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/{{enrollment_id}}",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        "{{enrollment_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Update Enrollment Progress",
+                            "request": {
+                                "method": "PUT",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"progress_percentage\": 50\n}"
+                                },
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/{{enrollment_id}}",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        "{{enrollment_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Cancel Enrollment",
+                            "request": {
+                                "method": "DELETE",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/{{enrollment_id}}",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        "{{enrollment_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Statistics",
+                    "item": [
+                        {
+                            "name": "Get Enrollment Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/stats",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        "stats"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Payment Service",
+            "description": "Payment Processing with transaction management",
+            "item": [
+                {
+                    "name": "Health Check",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{payment_service_url}}/health",
+                            "host": [
+                                "{{payment_service_url}}"
+                            ],
+                            "path": [
+                                "health"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Payments",
+                    "item": [
+                        {
+                            "name": "Create Payment",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 201', function () {",
+                                            "    pm.response.to.have.status(201);",
+                                            "});",
+                                            "",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.id) {",
+                                            "    pm.collectionVariables.set('payment_id', jsonData.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"course_id\": {{course_id}},\n    \"amount\": 49.99,\n    \"currency\": \"USD\",\n    \"payment_method\": \"credit_card\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "List My Payments",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Status code is 200', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Get Payment by ID",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/{{payment_id}}",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        "{{payment_id}}"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Confirm Payment",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/{{payment_id}}/confirm",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        "{{payment_id}}",
+                                        "confirm"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "Refund Payment (Admin)",
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    },
+                                    {
+                                        "key": "x-is-admin",
+                                        "value": "true"
+                                    },
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"reason\": \"Customer requested refund\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/{{payment_id}}/refund",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        "{{payment_id}}",
+                                        "refund"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Statistics",
+                    "item": [
+                        {
+                            "name": "Get Payment Stats",
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/stats",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        "stats"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "E2E Flows",
+            "description": "End-to-end test scenarios",
+            "item": [
+                {
+                    "name": "Complete Course Enrollment Flow",
+                    "item": [
+                        {
+                            "name": "1. Signup New Student",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Signup successful', function () {",
+                                            "    pm.response.to.have.status(201);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "var tokens = jsonData.tokens || jsonData;",
+                                            "pm.collectionVariables.set('access_token', tokens.access_token);",
+                                            "pm.collectionVariables.set('user_id', jsonData.user.id);"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"email\": \"e2e_student_{{$timestamp}}@example.com\",\n    \"username\": \"e2e_student_{{$timestamp}}\",\n    \"password\": \"E2ETestPass123!\",\n    \"role\": \"student\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{user_service_url}}/api/v1/auth/signup",
+                                    "host": [
+                                        "{{user_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "auth",
+                                        "signup"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "2. Browse Available Courses",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Courses retrieved', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.items && jsonData.items.length > 0) {",
+                                            "    pm.collectionVariables.set('course_id', jsonData.items[0].id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [],
+                                "url": {
+                                    "raw": "{{course_service_url}}/api/v1/courses/?is_published=true",
+                                    "host": [
+                                        "{{course_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "courses",
+                                        ""
+                                    ],
+                                    "query": [
+                                        {
+                                            "key": "is_published",
+                                            "value": "true"
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "3. Enroll in Course",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Enrollment created', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 202]);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.id) {",
+                                            "    pm.collectionVariables.set('enrollment_id', jsonData.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"course_id\": {{course_id}}\n}"
+                                },
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "4. Create Payment",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Payment created', function () {",
+                                            "    pm.response.to.have.status(201);",
+                                            "});",
+                                            "var jsonData = pm.response.json();",
+                                            "if (jsonData.id) {",
+                                            "    pm.collectionVariables.set('payment_id', jsonData.id);",
+                                            "}"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Content-Type",
+                                        "value": "application/json"
+                                    },
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "body": {
+                                    "mode": "raw",
+                                    "raw": "{\n    \"course_id\": {{course_id}},\n    \"amount\": 49.99,\n    \"currency\": \"USD\",\n    \"payment_method\": \"credit_card\"\n}"
+                                },
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        ""
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "5. Confirm Payment",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Payment confirmed', function () {",
+                                            "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "POST",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{payment_service_url}}/api/v1/payments/{{payment_id}}/confirm",
+                                    "host": [
+                                        "{{payment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "payments",
+                                        "{{payment_id}}",
+                                        "confirm"
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "name": "6. Verify Enrollment Active",
+                            "event": [
+                                {
+                                    "listen": "test",
+                                    "script": {
+                                        "exec": [
+                                            "pm.test('Enrollment retrieved', function () {",
+                                            "    pm.response.to.have.status(200);",
+                                            "});"
+                                        ],
+                                        "type": "text/javascript"
+                                    }
+                                }
+                            ],
+                            "request": {
+                                "method": "GET",
+                                "header": [
+                                    {
+                                        "key": "Authorization",
+                                        "value": "Bearer {{access_token}}"
+                                    },
+                                    {
+                                        "key": "x-user-id",
+                                        "value": "{{user_id}}"
+                                    }
+                                ],
+                                "url": {
+                                    "raw": "{{enrollment_service_url}}/api/v1/enrollments/{{enrollment_id}}",
+                                    "host": [
+                                        "{{enrollment_service_url}}"
+                                    ],
+                                    "path": [
+                                        "api",
+                                        "v1",
+                                        "enrollments",
+                                        "{{enrollment_id}}"
+                                    ]
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
