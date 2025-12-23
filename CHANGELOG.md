@@ -329,7 +329,7 @@ service-name/
 - [x] Postman collections
 - [x] Happy paths + error scenarios
 - [x] Auth/authz, input validation
-- [ ] Automate in CI
+- [x] Automate in CI
 
 ### Performance/Load Tests (Locust)
 - [x] User signup/login load
