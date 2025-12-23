@@ -69,11 +69,11 @@ SENSITIVE_FIELDS = {
 def sanitize_data(data: Any, depth: int = 0) -> Any:
     """
     Recursively sanitize sensitive data from logs.
-    
+
     Args:
         data: Data to sanitize
         depth: Current recursion depth (max 10)
-    
+
     Returns:
         Sanitized data
     """
@@ -82,7 +82,11 @@ def sanitize_data(data: Any, depth: int = 0) -> Any:
 
     if isinstance(data, dict):
         return {
-            k: "***REDACTED***" if k.lower() in SENSITIVE_FIELDS else sanitize_data(v, depth + 1)
+            k: (
+                "***REDACTED***"
+                if k.lower() in SENSITIVE_FIELDS
+                else sanitize_data(v, depth + 1)
+            )
             for k, v in data.items()
         }
     elif isinstance(data, list):
@@ -112,7 +116,7 @@ def set_correlation_id(correlation_id: Optional[str] = None) -> str:
 def format_log_record(record: Dict) -> str:
     """Format log record with correlation ID."""
     correlation_id = correlation_id_var.get() or "-"
-    
+
     # JSON format for production
     if settings.ENVIRONMENT == "production":
         return (
@@ -141,10 +145,10 @@ def format_log_record(record: Dict) -> str:
 def setup_logging(service_name: str = "course-service"):
     """
     Configure structured logging for the application.
-    
+
     Args:
         service_name: Name of the service for log identification
-    
+
     Returns:
         Configured logger instance
     """
@@ -195,7 +199,7 @@ def log_request(
 ):
     """
     Log API request with structured format.
-    
+
     Args:
         method: HTTP method
         path: Request path
@@ -212,19 +216,28 @@ def log_request(
         "duration_ms": round(duration_ms, 2),
         "correlation_id": get_correlation_id(),
     }
-    
+
     if user_id:
         log_data["user_id"] = user_id
-    
+
     if extra:
         log_data.update(sanitize_data(extra))
-    
+
     if status_code >= 500:
-        logger.error(f"Request: {method} {path} -> {status_code} ({duration_ms:.2f}ms)", **log_data)
+        logger.error(
+            f"Request: {method} {path} -> {status_code} ({duration_ms:.2f}ms)",
+            **log_data,
+        )
     elif status_code >= 400:
-        logger.warning(f"Request: {method} {path} -> {status_code} ({duration_ms:.2f}ms)", **log_data)
+        logger.warning(
+            f"Request: {method} {path} -> {status_code} ({duration_ms:.2f}ms)",
+            **log_data,
+        )
     else:
-        logger.info(f"Request: {method} {path} -> {status_code} ({duration_ms:.2f}ms)", **log_data)
+        logger.info(
+            f"Request: {method} {path} -> {status_code} ({duration_ms:.2f}ms)",
+            **log_data,
+        )
 
 
 def log_service_call(
@@ -237,7 +250,7 @@ def log_service_call(
 ):
     """
     Log inter-service communication.
-    
+
     Args:
         service: Target service name
         method: HTTP method
@@ -253,16 +266,20 @@ def log_service_call(
         "path": path,
         "correlation_id": get_correlation_id(),
     }
-    
+
     if status_code:
         log_data["status_code"] = status_code
     if duration_ms:
         log_data["duration_ms"] = round(duration_ms, 2)
     if error:
         log_data["error"] = error
-        logger.error(f"Service call to {service}: {method} {path} failed - {error}", **log_data)
+        logger.error(
+            f"Service call to {service}: {method} {path} failed - {error}", **log_data
+        )
     else:
-        logger.info(f"Service call to {service}: {method} {path} -> {status_code}", **log_data)
+        logger.info(
+            f"Service call to {service}: {method} {path} -> {status_code}", **log_data
+        )
 
 
 def log_business_event(
@@ -272,7 +289,7 @@ def log_business_event(
 ):
     """
     Log business events (enrollments, payments, etc.).
-    
+
     Args:
         event_type: Type of business event
         event_data: Event data
@@ -284,10 +301,10 @@ def log_business_event(
         "correlation_id": get_correlation_id(),
         **sanitize_data(event_data),
     }
-    
+
     if user_id:
         log_data["user_id"] = user_id
-    
+
     logger.info(f"Business event: {event_type}", **log_data)
 
 
