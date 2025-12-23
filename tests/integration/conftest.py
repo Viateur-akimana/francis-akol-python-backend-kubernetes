@@ -97,11 +97,13 @@ async def test_user(user_client: httpx.AsyncClient) -> AsyncGenerator[Dict, None
 
     if response.status_code == 201:
         result = response.json()
+        # Tokens may be nested in 'tokens' key or at root level
+        tokens = result.get("tokens", result)
         yield {
             **user_data,
             "user_id": result.get("user", {}).get("id"),
-            "access_token": result.get("access_token"),
-            "refresh_token": result.get("refresh_token"),
+            "access_token": tokens.get("access_token"),
+            "refresh_token": tokens.get("refresh_token"),
         }
     else:
         # If registration fails, try login (user may exist)
@@ -111,10 +113,13 @@ async def test_user(user_client: httpx.AsyncClient) -> AsyncGenerator[Dict, None
         )
         if login_response.status_code == 200:
             result = login_response.json()
+            # Tokens may be nested in 'tokens' key or at root level
+            tokens = result.get("tokens", result)
             yield {
                 **user_data,
-                "access_token": result.get("access_token"),
-                "refresh_token": result.get("refresh_token"),
+                "user_id": result.get("user", {}).get("id"),
+                "access_token": tokens.get("access_token"),
+                "refresh_token": tokens.get("refresh_token"),
             }
         else:
             pytest.skip(f"Could not create test user: {response.text}")
@@ -138,11 +143,13 @@ async def test_instructor(user_client: httpx.AsyncClient) -> AsyncGenerator[Dict
 
     if response.status_code == 201:
         result = response.json()
+        # Tokens may be nested in 'tokens' key or at root level
+        tokens = result.get("tokens", result)
         yield {
             **instructor_data,
             "user_id": result.get("user", {}).get("id"),
-            "access_token": result.get("access_token"),
-            "refresh_token": result.get("refresh_token"),
+            "access_token": tokens.get("access_token"),
+            "refresh_token": tokens.get("refresh_token"),
         }
     else:
         pytest.skip(f"Could not create test instructor: {response.text}")
@@ -165,7 +172,12 @@ async def test_course(
         "is_published": True,
     }
 
-    headers = {"Authorization": f"Bearer {test_instructor['access_token']}"}
+    # Course service requires x-user-id header for course creation
+    user_id = test_instructor.get("user_id", 1)
+    headers = {
+        "Authorization": f"Bearer {test_instructor['access_token']}",
+        "x-user-id": str(user_id),
+    }
 
     response = await course_client.post(
         "/api/v1/courses/",
