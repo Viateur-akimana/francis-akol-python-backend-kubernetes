@@ -25,21 +25,28 @@ echo "⏳ Waiting for MongoDB..."
 python3 -c "
 import pymongo
 import time
+import os
+
+# Use MONGODB_URL from environment or fallback to default
+mongodb_url = os.environ.get('MONGODB_URL', 'mongodb://mlh_mongo_user:mlh_mongo_password@mongodb:27017/mlh_content_db?authSource=admin')
 
 while True:
     try:
-        client = pymongo.MongoClient('mongodb://mlh_mongo_user:mlh_mongo_password@mongodb:27017/mlh_content_db?authSource=admin')
+        client = pymongo.MongoClient(mongodb_url)
         client.admin.command('ping')
         print('✅ MongoDB is ready!')
         break
-    except:
-        print('MongoDB is unavailable - sleeping')
+    except Exception as e:
+        print(f'MongoDB is unavailable - sleeping ({e})')
         time.sleep(2)
 "
 
 # Wait for Redis
 echo "⏳ Waiting for Redis..."
-while ! redis-cli -h redis -a mlh_redis_password ping | grep -q PONG; do
+# Extract password from REDIS_URL or use default
+REDIS_PASS=$(echo "$REDIS_URL" | sed -n 's/.*:\/\/:\([^@]*\)@.*/\1/p')
+REDIS_PASS=${REDIS_PASS:-mlh_redis_password}
+while ! redis-cli -h redis -a "$REDIS_PASS" ping 2>/dev/null | grep -q PONG; do
   echo "Redis is unavailable - sleeping"
   sleep 2
 done
