@@ -25,9 +25,7 @@ class PaymentRepository:
 
     async def get_payment_by_id(self, payment_id: int) -> Optional[Payment]:
         """Get payment by ID."""
-        result = await self.db.execute(
-            select(Payment).where(Payment.id == payment_id)
-        )
+        result = await self.db.execute(select(Payment).where(Payment.id == payment_id))
         return result.scalar_one_or_none()
 
     async def get_payment_by_intent_id(self, intent_id: str) -> Optional[Payment]:
@@ -37,10 +35,21 @@ class PaymentRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_payment_by_transaction_id(self, transaction_id: str) -> Optional[Payment]:
+    async def get_payment_by_transaction_id(
+        self, transaction_id: str
+    ) -> Optional[Payment]:
         """Get payment by transaction ID."""
         result = await self.db.execute(
             select(Payment).where(Payment.transaction_id == transaction_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_payment_by_idempotency_key(
+        self, idempotency_key: str
+    ) -> Optional[Payment]:
+        """Get payment by idempotency key for duplicate prevention."""
+        result = await self.db.execute(
+            select(Payment).where(Payment.idempotency_key == idempotency_key)
         )
         return result.scalar_one_or_none()
 
@@ -66,7 +75,9 @@ class PaymentRepository:
         self, user_id: int, status: Optional[PaymentStatus] = None
     ) -> int:
         """Count user payments."""
-        query = select(func.count()).select_from(Payment).where(Payment.user_id == user_id)
+        query = (
+            select(func.count()).select_from(Payment).where(Payment.user_id == user_id)
+        )
 
         if status:
             query = query.where(Payment.status == status)
@@ -96,7 +107,11 @@ class PaymentRepository:
         self, course_id: int, status: Optional[PaymentStatus] = None
     ) -> int:
         """Count course payments."""
-        query = select(func.count()).select_from(Payment).where(Payment.course_id == course_id)
+        query = (
+            select(func.count())
+            .select_from(Payment)
+            .where(Payment.course_id == course_id)
+        )
 
         if status:
             query = query.where(Payment.status == status)
@@ -109,13 +124,15 @@ class PaymentRepository:
     ) -> Optional[Payment]:
         """Get user's payment for a specific course (completed)."""
         result = await self.db.execute(
-            select(Payment).where(
+            select(Payment)
+            .where(
                 and_(
                     Payment.user_id == user_id,
                     Payment.course_id == course_id,
-                    Payment.status == PaymentStatus.COMPLETED
+                    Payment.status == PaymentStatus.COMPLETED,
                 )
-            ).order_by(Payment.created_at.desc())
+            )
+            .order_by(Payment.created_at.desc())
         )
         return result.scalar_one_or_none()
 
@@ -129,18 +146,30 @@ class PaymentRepository:
         """Get payment statistics."""
         query = select(
             func.count().label("total"),
-            func.coalesce(func.sum(Payment.amount), Decimal("0.00")).label("total_amount"),
-            func.count().filter(Payment.status == PaymentStatus.COMPLETED).label("completed"),
+            func.coalesce(func.sum(Payment.amount), Decimal("0.00")).label(
+                "total_amount"
+            ),
+            func.count()
+            .filter(Payment.status == PaymentStatus.COMPLETED)
+            .label("completed"),
             func.coalesce(
-                func.sum(Payment.amount).filter(Payment.status == PaymentStatus.COMPLETED),
-                Decimal("0.00")
+                func.sum(Payment.amount).filter(
+                    Payment.status == PaymentStatus.COMPLETED
+                ),
+                Decimal("0.00"),
             ).label("completed_amount"),
-            func.count().filter(Payment.status == PaymentStatus.PENDING).label("pending"),
+            func.count()
+            .filter(Payment.status == PaymentStatus.PENDING)
+            .label("pending"),
             func.count().filter(Payment.status == PaymentStatus.FAILED).label("failed"),
-            func.count().filter(Payment.status == PaymentStatus.REFUNDED).label("refunded"),
+            func.count()
+            .filter(Payment.status == PaymentStatus.REFUNDED)
+            .label("refunded"),
             func.coalesce(
-                func.sum(Payment.amount).filter(Payment.status == PaymentStatus.REFUNDED),
-                Decimal("0.00")
+                func.sum(Payment.amount).filter(
+                    Payment.status == PaymentStatus.REFUNDED
+                ),
+                Decimal("0.00"),
             ).label("refunded_amount"),
         ).select_from(Payment)
 

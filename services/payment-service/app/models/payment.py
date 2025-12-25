@@ -57,17 +57,19 @@ class Payment(Base, TimestampMixin):
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
     course_id: Mapped[int] = mapped_column(Integer, nullable=False, index=True)
-    enrollment_id: Mapped[Optional[int]] = mapped_column(Integer, nullable=True, index=True)
+    enrollment_id: Mapped[Optional[int]] = mapped_column(
+        Integer, nullable=True, index=True
+    )
     amount: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     currency: Mapped[str] = mapped_column(String(3), nullable=False, default="USD")
     status: Mapped[PaymentStatus] = mapped_column(
-        Enum(PaymentStatus, name='paymentstatus', create_type=False),
+        Enum(PaymentStatus, name="paymentstatus", create_type=False),
         default=PaymentStatus.PENDING,
         nullable=False,
         index=True,
     )
     payment_method: Mapped[PaymentMethod] = mapped_column(
-        Enum(PaymentMethod, name='paymentmethod', create_type=False), nullable=False
+        Enum(PaymentMethod, name="paymentmethod", create_type=False), nullable=False
     )
     transaction_id: Mapped[Optional[str]] = mapped_column(
         String(255), unique=True, nullable=True, index=True
@@ -75,12 +77,17 @@ class Payment(Base, TimestampMixin):
     payment_intent_id: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, index=True
     )
+    idempotency_key: Mapped[Optional[str]] = mapped_column(
+        String(255), unique=True, nullable=True, index=True
+    )
     failure_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     refund_reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     refunded_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True
     )
-    payment_metadata: Mapped[Optional[str]] = mapped_column(Text, nullable=True)  # JSON string
+    payment_metadata: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True
+    )  # JSON string
 
     def __repr__(self) -> str:
         return f"<Payment(id={self.id}, user_id={self.user_id}, course_id={self.course_id}, amount={self.amount}, status={self.status})>"

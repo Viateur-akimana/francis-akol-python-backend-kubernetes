@@ -21,7 +21,10 @@ PGPASSWORD=mlh_secure_password psql -h postgres -U mlh_user -d enrollment_db -c 
 
 # Wait for Redis
 echo "⏳ Waiting for Redis..."
-while ! redis-cli -h redis -a mlh_redis_password ping | grep -q PONG; do
+# Extract password from REDIS_URL or use default
+REDIS_PASS=$(echo "$REDIS_URL" | sed -n 's/.*:\/\/:\([^@]*\)@.*/\1/p')
+REDIS_PASS=${REDIS_PASS:-mlh_redis_password}
+while ! redis-cli -h redis -a "$REDIS_PASS" ping 2>/dev/null | grep -q PONG; do
   echo "Redis is unavailable - sleeping"
   sleep 2
 done

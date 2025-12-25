@@ -48,7 +48,9 @@ async def get_courses(
     instructor_id: Optional[int] = Query(None),
     is_published: Optional[bool] = Query(None),
     search: Optional[str] = Query(None),
-    sort_by: str = Query("created_at", regex="^(title|price|created_at|enrolled_count)$"),
+    sort_by: str = Query(
+        "created_at", regex="^(title|price|created_at|enrolled_count)$"
+    ),
     sort_order: str = Query("desc", regex="^(asc|desc)$"),
     db: AsyncSession = Depends(get_db),
 ):
@@ -128,7 +130,11 @@ async def delete_course(
     return MessageResponse(message=f"Course {course_id} deleted successfully")
 
 
-@router.post("/{course_id}/content", response_model=CourseContentResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/{course_id}/content",
+    response_model=CourseContentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_course_content(
     course_id: int,
     content_data: CourseContentCreate,
@@ -147,10 +153,12 @@ async def create_course_content(
     course = await course_repository.get_course_by_id(course_id, include_contents=False)
     if not course:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=404, detail="Course not found")
 
     if course.instructor_id != x_user_id:
         from fastapi import HTTPException
+
         raise HTTPException(status_code=403, detail="Not authorized")
 
     content = await course_repository.create_course_content(
@@ -159,6 +167,7 @@ async def create_course_content(
 
     # Invalidate cache
     from app.core.cache import cache
+
     await cache.delete(f"course:{course_id}")
 
     return CourseContentResponse.model_validate(content)

@@ -8,18 +8,37 @@ from fastapi import HTTPException, status
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 
-# Password hashing context
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Password hashing context with bcrypt
+# Note: bcrypt truncates passwords to 72 bytes internally
+# We configure passlib to handle this gracefully
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=12,
+)
 
 
 def hash_password(password: str) -> str:
-    """Hash a password using bcrypt."""
-    return pwd_context.hash(password)
+    """Hash a password using bcrypt.
+
+    Note: bcrypt truncates passwords to 72 bytes. For security,
+    we explicitly truncate here to avoid issues with different bcrypt versions.
+    """
+    # Truncate to 72 bytes to prevent bcrypt ValueError
+    password_bytes = password.encode("utf-8")[:72].decode("utf-8", errors="ignore")
+    return pwd_context.hash(password_bytes)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a password against its hash."""
-    return pwd_context.verify(plain_password, hashed_password)
+    """Verify a password against its hash.
+
+    Note: Uses same truncation as hash_password for consistency.
+    """
+    # Truncate to 72 bytes to match hashing behavior
+    password_bytes = plain_password.encode("utf-8")[:72].decode(
+        "utf-8", errors="ignore"
+    )
+    return pwd_context.verify(password_bytes, hashed_password)
 
 
 def create_access_token(

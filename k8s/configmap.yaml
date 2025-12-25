@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mlh-config
+  namespace: mlh-platform
+  labels:
+    app.kubernetes.io/part-of: modular-learning-hub
+data:
+  # Environment
+  ENVIRONMENT: "production"
+  DEBUG: "false"
+  
+  # Redis URLs (service discovery)
+  REDIS_URL: "redis://redis-service:6379/0"
+  CELERY_BROKER_URL: "redis://redis-service:6379/1"
+  CELERY_RESULT_BACKEND: "redis://redis-service:6379/1"
+  
+  # Inter-service communication
+  USER_SERVICE_URL: "http://user-service:80"
+  COURSE_SERVICE_URL: "http://course-service:80"
+  ENROLLMENT_SERVICE_URL: "http://enrollment-service:80"
+  PAYMENT_SERVICE_URL: "http://payment-service:80"
+  
+  # CORS Origins
+  CORS_ORIGINS: "http://localhost:3000,https://mlh.example.com"
+  
+  # JWT Settings
+  JWT_ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"
+  REFRESH_TOKEN_EXPIRE_DAYS: "7"
+  
+  # Database pool settings
+  DB_POOL_SIZE: "20"
+  DB_MAX_OVERFLOW: "10"
+  DB_POOL_TIMEOUT: "30"
+  DB_POOL_RECYCLE: "1800"
+  
+  # Cache settings
+  REDIS_CACHE_TTL: "300"

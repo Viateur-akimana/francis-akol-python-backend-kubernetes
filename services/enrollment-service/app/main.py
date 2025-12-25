@@ -7,6 +7,7 @@ from app.core.config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 
 
 @asynccontextmanager
@@ -43,6 +44,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Prometheus metrics
+Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+
 
 # Health check endpoints
 @app.get("/health", tags=["Health"])
@@ -50,7 +54,11 @@ async def health_check():
     """Health check endpoint for container orchestration."""
     return JSONResponse(
         status_code=200,
-        content={"status": "healthy", "service": "enrollment-service", "version": "1.0.0"},
+        content={
+            "status": "healthy",
+            "service": "enrollment-service",
+            "version": "1.0.0",
+        },
     )
 
 

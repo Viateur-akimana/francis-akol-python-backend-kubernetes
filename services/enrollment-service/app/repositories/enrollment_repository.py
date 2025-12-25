@@ -16,7 +16,9 @@ class EnrollmentRepository:
 
     async def create_enrollment(self, user_id: int, course_id: int) -> Enrollment:
         """Create a new enrollment."""
-        enrollment = Enrollment(user_id=user_id, course_id=course_id, status=EnrollmentStatus.PENDING)
+        enrollment = Enrollment(
+            user_id=user_id, course_id=course_id, status=EnrollmentStatus.PENDING
+        )
         self.db.add(enrollment)
         await self.db.commit()
         await self.db.refresh(enrollment)
@@ -35,10 +37,7 @@ class EnrollmentRepository:
         """Get user's enrollment for a specific course."""
         result = await self.db.execute(
             select(Enrollment).where(
-                and_(
-                    Enrollment.user_id == user_id,
-                    Enrollment.course_id == course_id
-                )
+                and_(Enrollment.user_id == user_id, Enrollment.course_id == course_id)
             )
         )
         return result.scalar_one_or_none()
@@ -65,7 +64,11 @@ class EnrollmentRepository:
         self, user_id: int, status: Optional[EnrollmentStatus] = None
     ) -> int:
         """Count user enrollments."""
-        query = select(func.count()).select_from(Enrollment).where(Enrollment.user_id == user_id)
+        query = (
+            select(func.count())
+            .select_from(Enrollment)
+            .where(Enrollment.user_id == user_id)
+        )
 
         if status:
             query = query.where(Enrollment.status == status)
@@ -95,7 +98,11 @@ class EnrollmentRepository:
         self, course_id: int, status: Optional[EnrollmentStatus] = None
     ) -> int:
         """Count course enrollments."""
-        query = select(func.count()).select_from(Enrollment).where(Enrollment.course_id == course_id)
+        query = (
+            select(func.count())
+            .select_from(Enrollment)
+            .where(Enrollment.course_id == course_id)
+        )
 
         if status:
             query = query.where(Enrollment.status == status)
@@ -118,10 +125,18 @@ class EnrollmentRepository:
         """Get enrollment statistics."""
         query = select(
             func.count().label("total"),
-            func.count().filter(Enrollment.status == EnrollmentStatus.ACTIVE).label("active"),
-            func.count().filter(Enrollment.status == EnrollmentStatus.COMPLETED).label("completed"),
-            func.count().filter(Enrollment.status == EnrollmentStatus.CANCELLED).label("cancelled"),
-            func.count().filter(Enrollment.status == EnrollmentStatus.PENDING).label("pending"),
+            func.count()
+            .filter(Enrollment.status == EnrollmentStatus.ACTIVE)
+            .label("active"),
+            func.count()
+            .filter(Enrollment.status == EnrollmentStatus.COMPLETED)
+            .label("completed"),
+            func.count()
+            .filter(Enrollment.status == EnrollmentStatus.CANCELLED)
+            .label("cancelled"),
+            func.count()
+            .filter(Enrollment.status == EnrollmentStatus.PENDING)
+            .label("pending"),
         ).select_from(Enrollment)
 
         if user_id:

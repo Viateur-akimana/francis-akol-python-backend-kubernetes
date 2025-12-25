@@ -1,0 +1,119 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: mlh-platform
+  labels:
+    app: postgres
+    app.kubernetes.io/part-of: modular-learning-hub
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:15-alpine
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: mlh-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mlh-secrets
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - postgres
+          initialDelaySeconds: 5
+          periodSeconds: 5
+      volumes:
+      - name: init-scripts
+        configMap:
+          name: postgres-init
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: mlh-platform
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    targetPort: 5432
+    name: postgres
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init
+  namespace: mlh-platform
+data:
+  init.sql: |
+    -- Create databases for each service
+    CREATE DATABASE user_service_db;
+    CREATE DATABASE course_service_db;
+    CREATE DATABASE enrollment_service_db;
+    CREATE DATABASE payment_service_db;
+
+    -- Create users for each service
+    CREATE USER user_user WITH PASSWORD 'user_password';
+    CREATE USER course_user WITH PASSWORD 'course_password';
+    CREATE USER enrollment_user WITH PASSWORD 'enrollment_password';
+    CREATE USER payment_user WITH PASSWORD 'payment_password';
+
+    -- Grant privileges
+    GRANT ALL PRIVILEGES ON DATABASE user_service_db TO user_user;
+    GRANT ALL PRIVILEGES ON DATABASE course_service_db TO course_user;
+    GRANT ALL PRIVILEGES ON DATABASE enrollment_service_db TO enrollment_user;
+    GRANT ALL PRIVILEGES ON DATABASE payment_service_db TO payment_user;

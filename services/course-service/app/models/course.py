@@ -36,9 +36,13 @@ class Category(Base, TimestampMixin):
     __tablename__ = "categories"
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
-    name: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    name: Mapped[str] = mapped_column(
+        String(100), unique=True, nullable=False, index=True
+    )
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    slug: Mapped[str] = mapped_column(String(100), unique=True, nullable=False, index=True)
+    slug: Mapped[str] = mapped_column(
+        String(100), unique=True, nullable=False, index=True
+    )
 
     # Relationships
     courses: Mapped[List["Course"]] = relationship("Course", back_populates="category")
@@ -66,9 +70,14 @@ class Course(Base, TimestampMixin):
     thumbnail_url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     # Relationships
-    category: Mapped[Optional["Category"]] = relationship("Category", back_populates="courses")
+    category: Mapped[Optional["Category"]] = relationship(
+        "Category", back_populates="courses"
+    )
     contents: Mapped[List["CourseContent"]] = relationship(
-        "CourseContent", back_populates="course", cascade="all, delete-orphan", order_by="CourseContent.order"
+        "CourseContent",
+        back_populates="course",
+        cascade="all, delete-orphan",
+        order_by="CourseContent.order",
     )
 
     def __repr__(self) -> str:
