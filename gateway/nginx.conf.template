@@ -82,40 +82,21 @@ http {
             proxy_buffering off;
         }
 
-        # Docs routes for each service
-        location /docs/users {
-            set $user_service "${USER_SERVICE_URL}";
-            proxy_pass $user_service/docs;
-            proxy_ssl_server_name on;
-            proxy_set_header Host user-service-production-21db.up.railway.app;
-            proxy_set_header X-Real-IP $remote_addr;
+        # Docs redirects - point to each service's actual Swagger UI
+        location = /docs/users {
+            return 302 ${USER_SERVICE_URL}/docs;
+        }
+        location = /docs/courses {
+            return 302 ${COURSE_SERVICE_URL}/docs;
+        }
+        location = /docs/enrollments {
+            return 302 ${ENROLLMENT_SERVICE_URL}/docs;
+        }
+        location = /docs/payments {
+            return 302 ${PAYMENT_SERVICE_URL}/docs;
         }
 
-        location /docs/courses {
-            set $course_service "${COURSE_SERVICE_URL}";
-            proxy_pass $course_service/docs;
-            proxy_ssl_server_name on;
-            proxy_set_header Host course-service-production-720c.up.railway.app;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
-
-        location /docs/enrollments {
-            set $enrollment_service "${ENROLLMENT_SERVICE_URL}";
-            proxy_pass $enrollment_service/docs;
-            proxy_ssl_server_name on;
-            proxy_set_header Host enrollment-service-production-5561.up.railway.app;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
-
-        location /docs/payments {
-            set $payment_service "${PAYMENT_SERVICE_URL}";
-            proxy_pass $payment_service/docs;
-            proxy_ssl_server_name on;
-            proxy_set_header Host payment-service-production-ec55.up.railway.app;
-            proxy_set_header X-Real-IP $remote_addr;
-        }
-
-        # Root - API info
+        # Root - API info with documentation links
         location / {
             return 200 '{
                 "name": "MLH Fellowship API Gateway",
@@ -127,11 +108,11 @@ http {
                     "enrollments": "/api/v1/enrollments",
                     "payments": "/api/v1/payments"
                 },
-                "docs": {
-                    "users": "/docs/users",
-                    "courses": "/docs/courses",
-                    "enrollments": "/docs/enrollments",
-                    "payments": "/docs/payments"
+                "documentation": {
+                    "users": "https://user-service-production-21db.up.railway.app/docs",
+                    "courses": "https://course-service-production-720c.up.railway.app/docs",
+                    "enrollments": "https://enrollment-service-production-5561.up.railway.app/docs",
+                    "payments": "https://payment-service-production-ec55.up.railway.app/docs"
                 },
                 "health": "/health"
             }';
