@@ -1,7 +1,16 @@
 FROM nginx:alpine
 
-# Copy nginx configuration
-COPY gateway/nginx.conf /etc/nginx/nginx.conf
+# Install envsubst (comes with gettext package)
+RUN apk add --no-cache gettext
+
+# Copy nginx configuration template
+COPY gateway/nginx.conf.template /etc/nginx/nginx.conf.template
+
+# Create entrypoint script
+RUN echo '#!/bin/sh' > /docker-entrypoint.sh && \
+    echo 'envsubst "\$USER_SERVICE_URL \$COURSE_SERVICE_URL \$ENROLLMENT_SERVICE_URL \$PAYMENT_SERVICE_URL" < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf' >> /docker-entrypoint.sh && \
+    echo 'exec nginx -g "daemon off;"' >> /docker-entrypoint.sh && \
+    chmod +x /docker-entrypoint.sh
 
 # Expose port 80
 EXPOSE 80
@@ -10,5 +19,5 @@ EXPOSE 80
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD wget --no-verbose --tries=1 --spider http://localhost/health || exit 1
 
-# Run nginx in foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Run entrypoint
+CMD ["/docker-entrypoint.sh"]
