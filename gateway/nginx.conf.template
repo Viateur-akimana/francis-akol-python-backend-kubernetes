@@ -3,8 +3,8 @@ events {
 }
 
 http {
-    # Resolve DNS at runtime
-    resolver 127.0.0.11 valid=10s;
+    # Resolve DNS at runtime using public DNS servers
+    resolver 8.8.8.8 1.1.1.1 valid=30s ipv6=off;
 
     server {
         listen 80;
