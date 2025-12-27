@@ -20,7 +20,8 @@ http {
         location /api/v1/users {
             set $user_service "${USER_SERVICE_URL}";
             proxy_pass $user_service/api/v1/users;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host user-service-production-21db.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
@@ -29,7 +30,8 @@ http {
         location /api/v1/auth {
             set $user_service "${USER_SERVICE_URL}";
             proxy_pass $user_service/api/v1/auth;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host user-service-production-21db.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
@@ -39,7 +41,8 @@ http {
         location /api/v1/courses {
             set $course_service "${COURSE_SERVICE_URL}";
             proxy_pass $course_service/api/v1/courses;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host course-service-production-720c.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
@@ -49,7 +52,8 @@ http {
         location /api/v1/enrollments {
             set $enrollment_service "${ENROLLMENT_SERVICE_URL}";
             proxy_pass $enrollment_service/api/v1/enrollments;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host enrollment-service-production-5561.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
@@ -59,7 +63,8 @@ http {
         location /api/v1/payments {
             set $payment_service "${PAYMENT_SERVICE_URL}";
             proxy_pass $payment_service/api/v1/payments;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host payment-service-production-ec55.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
@@ -69,7 +74,8 @@ http {
         location /api/v1/webhooks/stripe {
             set $payment_service "${PAYMENT_SERVICE_URL}";
             proxy_pass $payment_service/api/v1/webhooks/stripe;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host payment-service-production-ec55.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
@@ -80,28 +86,32 @@ http {
         location /docs/users {
             set $user_service "${USER_SERVICE_URL}";
             proxy_pass $user_service/docs;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host user-service-production-21db.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
         }
 
         location /docs/courses {
             set $course_service "${COURSE_SERVICE_URL}";
             proxy_pass $course_service/docs;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host course-service-production-720c.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
         }
 
         location /docs/enrollments {
             set $enrollment_service "${ENROLLMENT_SERVICE_URL}";
             proxy_pass $enrollment_service/docs;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host enrollment-service-production-5561.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
         }
 
         location /docs/payments {
             set $payment_service "${PAYMENT_SERVICE_URL}";
             proxy_pass $payment_service/docs;
-            proxy_set_header Host $host;
+            proxy_ssl_server_name on;
+            proxy_set_header Host payment-service-production-ec55.up.railway.app;
             proxy_set_header X-Real-IP $remote_addr;
         }
 
