@@ -117,10 +117,10 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOn
   role       = aws_iam_role.node_role.name
 }
 
-# Managed Spot Node Group
-resource "aws_eks_node_group" "spot_nodes" {
+# Managed Core Node Group (On-Demand for System Pods)
+resource "aws_eks_node_group" "core_nodes" {
   cluster_name    = aws_eks_cluster.main_cluster.name
-  node_group_name = "${var.cluster_name}-spot-nodes"
+  node_group_name = "${var.cluster_name}-core-nodes"
   node_role_arn   = aws_iam_role.node_role.arn
   subnet_ids      = var.private_subnets
 
@@ -130,14 +130,86 @@ resource "aws_eks_node_group" "spot_nodes" {
     min_size     = 1
   }
 
-  instance_types = var.spot_instance_types
-  capacity_type  = "SPOT"
+  instance_types = ["t3.medium"] # On-demand for core reliability
+  capacity_type  = "ON_DEMAND"
 
   depends_on = [
     aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy,
     aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy,
     aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly,
   ]
+}
+
+# Karpenter Controller IAM Role (IRSA)
+resource "aws_iam_role" "karpenter_controller" {
+  name = "${var.cluster_name}-karpenter-controller"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.oidc[0].arn
+        }
+        Condition = {
+          StringEquals = {
+            "${replace(aws_eks_cluster.main_cluster.identity[0].oidc[0].issuer, "https://", "")}:sub" : "system:serviceaccount:karpenter:karpenter"
+          }
+        }
+      },
+    ]
+  })
+}
+
+# Karpenter Controller Policy
+resource "aws_iam_role_policy" "karpenter_controller" {
+  name = "${var.cluster_name}-karpenter-policy"
+  role = aws_iam_role.karpenter_controller.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "ec2:CreateFleet",
+          "ec2:CreateLaunchTemplate",
+          "ec2:CreateTags",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInstanceTypeCapabilities",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeInstances",
+          "ec2:DescribeLaunchTemplates",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSubnets",
+          "ec2:RunInstances",
+          "ec2:TerminateInstances",
+          "ec2:DeleteLaunchTemplate",
+          "ssm:GetParameter"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action   = "iam:PassRole"
+        Effect   = "Allow"
+        Resource = aws_iam_role.node_role.arn
+      }
+    ]
+  })
+}
+
+# OIDC Provider (Required for IRSA)
+data "tls_certificate" "eks" {
+  url = aws_eks_cluster.main_cluster.identity[0].oidc[0].issuer
+}
+
+resource "aws_iam_openid_connect_provider" "oidc" {
+  count = 1
+  client_id_list  = ["sts.amazonaws.com"]
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
+  url             = aws_eks_cluster.main_cluster.identity[0].oidc[0].issuer
 }
 
 # Manage Core Add-ons
@@ -184,7 +256,12 @@ output "cluster_ca_certificate" {
   value       = aws_eks_cluster.main_cluster.certificate_authority[0].data
 }
 
-output "node_security_group_id" {
-  description = "Security group ID attached to the EKS nodes"
-  value       = aws_eks_cluster.main_cluster.vpc_config[0].cluster_security_group_id
+output "karpenter_controller_role_arn" {
+  description = "IAM Role ARN for Karpenter Controller"
+  value       = aws_iam_role.karpenter_controller.arn
+}
+
+output "node_role_name" {
+  description = "IAM Role name for EKS nodes"
+  value       = aws_iam_role.node_role.name
 }

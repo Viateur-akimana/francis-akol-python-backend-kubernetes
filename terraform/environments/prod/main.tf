@@ -132,3 +132,12 @@ module "gitops" {
   cluster_name = module.compute.cluster_name
   environment  = "production"
 }
+
+module "karpenter" {
+  source                 = "../../modules/karpenter"
+  cluster_name           = module.compute.cluster_name
+  cluster_endpoint       = module.compute.cluster_endpoint
+  karpenter_iam_role_arn = module.compute.karpenter_controller_role_arn
+  node_iam_role_name     = module.compute.node_role_name
+  private_subnets        = module.networking.private_subnets
+}
