@@ -89,8 +89,7 @@ def upgrade() -> None:
     )
 
     # Create trigger for auto-update timestamps
-    op.execute(
-        """
+    op.execute("""
         CREATE OR REPLACE FUNCTION update_updated_at_column()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -98,15 +97,12 @@ def upgrade() -> None:
             RETURN NEW;
         END;
         $$ language 'plpgsql';
-    """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_enrollments_updated_at BEFORE UPDATE ON enrollments
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
-    )
+        """)
 
 
 def downgrade() -> None:

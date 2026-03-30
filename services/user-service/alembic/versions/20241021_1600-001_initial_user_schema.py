@@ -81,8 +81,7 @@ def upgrade() -> None:
     op.create_index(op.f("ix_profiles_user_id"), "profiles", ["user_id"], unique=True)
 
     # Create trigger to auto-update updated_at timestamp for users
-    op.execute(
-        """
+    op.execute("""
         CREATE OR REPLACE FUNCTION update_updated_at_column()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -90,22 +89,17 @@ def upgrade() -> None:
             RETURN NEW;
         END;
         $$ language 'plpgsql';
-    """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
-    )
+        """)
 
 
 def downgrade() -> None:
