@@ -680,5 +680,39 @@ service-name/
 
 ---
 
-**Last Updated:** October 21, 2025  
-**Status:** Ready to build 🚀
+## MILESTONE 8: CLOUD INFRASTRUCTURE & GITOPS
+**PR #15:** `feature/milestone-8-eks-gitops-migration`
+**Status:** COMPLETED (March 2026)
+
+### Three-Tier Terraform Architecture
+- Refactored Terraform into a modular 3-tier structure
+- Defined modules: `networking`, `security`, `compute`, `database`, `gitops`
+- Implemented environment separation (staging vs production)
+- Configured state management with S3 and DynamoDB Locking
+
+### AWS EKS & Managed Services
+- Automated EKS Cluster provisioning within a dedicated VPC
+- Managed Node Groups using EC2 Spot Instances
+- Migrated to Amazon RDS (PostgreSQL)
+- Automated HPA via metrics-server
+- Enabled EBS CSI Driver for persistent storage
+
+### Security & Compliance
+- Implemented KMS CMK encryption for Secrets at rest
+- Built Security Group Hierarchy: Internet -> ALB -> Node -> RDS
+- Configured IAM Roles for Service Accounts (IRSA)
+
+### Continuous Delivery & GitOps
+- Bootstrapped ArgoCD via Helm
+- Configured ArgoCD to monitor k8s/ directory
+- Updated GitHub Actions for multi-env IaC deployment
+
+### Infrastructure Documentation
+- Updated README with EKS/ArgoCD architecture
+- Created docs/deployment/infrastructure-guide.md
+- Documented secrets management for RDS/JWT
+
+---
+
+**Last Updated:** March 30, 2026  
+**Status:** Cloud Migration Ready

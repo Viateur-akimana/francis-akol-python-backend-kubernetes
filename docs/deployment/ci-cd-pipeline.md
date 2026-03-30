@@ -4,108 +4,49 @@ This document describes the CI/CD pipeline configuration for the MLH platform.
 
 ## Overview
 
-The pipeline uses GitHub Actions for continuous integration and deployment.
+The platform uses GitHub Actions for continuous integration and deployment. The pipeline is split into CI (Quality & Tests) and CD (Infrastructure & Application Deployment).
 
-## CI Pipeline (`.github/workflows/ci.yml`)
+## CI Pipeline (.github/workflows/ci.yml)
 
 ### Triggers
-- Push to: `development`, `main`, `feature/*`, `fix/*`
-- Pull requests to: `development`, `main`
+- Push to: `main`, `feature/*`, `fix/*`
+- Pull requests to: `main`
 
-### Jobs
+### Workflow Steps
+1. **Code Quality Checks:**
+   - **Black:** Code formatting check.
+   - **isort:** Import sorting check.
+   - **flake8:** Linting.
+   - **mypy:** Type checking.
+2. **Security Scan:**
+   - **Bandit:** Static security analysis for Python code.
+   - **Trivy:** Container image scanning for vulnerabilities.
+3. **Automated Testing:**
+   - Runs unit and integration tests per service.
+   - Generates coverage reports.
 
-#### 1. Code Quality Checks
-Runs on every push/PR:
-- **Black** - Code formatting check
-- **isort** - Import sorting check
-- **flake8** - Linting (syntax errors, undefined names)
-- **mypy** - Type checking
+## CD Pipeline (.github/workflows/cd.yml)
 
-#### 2. Tests
-Runs after code quality passes:
-- User service tests with PostgreSQL and Redis
-- Coverage reports uploaded to Codecov
+The CD pipeline manages the building of artifacts and the provisioning of infrastructure.
 
-#### 3. Docker Build
-Builds images for all 4 services:
-- `mlh-user-service`
-- `mlh-course-service`
-- `mlh-enrollment-service`
-- `mlh-payment-service`
+### Workflow Steps
+1. **Build and Push:**
+   - Builds Docker images for all microservices.
+   - Pushes images to GitHub Container Registry (GHCR).
+2. **Infrastructure Provisioning:**
+   - Uses Terraform to provision AWS EKS, RDS, and Networking.
+   - Manages environments (Staging/Production).
+   - Injects secrets via `TF_VAR_` environment variables.
 
-#### 4. Security Scan
-Runs Bandit security scanner on all services.
+## Deployment Strategy
 
-## Running Locally
+1. **GitOps (ArgoCD):**
+   - The cluster is synchronized with the `k8s/` directory.
+   - Any commit to the `k8s/` manifests triggers an automatic rollout.
+2. **Staging & Production:**
+   - Commits to `main` auto-deploy to Staging.
+   - Production deployments are triggered manually via GitHub Actions with approval gates.
 
-### Simulate CI checks
-```bash
-# Code formatting
-black --check services/
-isort --check-only services/ --profile=black
+---
 
-# Linting
-flake8 services/ --select=E9,F63,F7,F82
-
-# Type checking
-mypy services/user-service/app --ignore-missing-imports
-```
-
-### Run tests
-```bash
-cd services/user-service
-pytest tests/ -v --cov=app
-```
-
-## Workflow Configuration
-
-```yaml
-name: CI Pipeline
-
-on:
-  push:
-    branches: [development, main, feature/*, fix/*]
-  pull_request:
-    branches: [development, main]
-
-jobs:
-  lint-and-format:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
-      - run: pip install black isort flake8
-      - run: black --check services/
-      - run: isort --check-only services/ --profile=black
-      - run: flake8 services/
-```
-
-## Branch Strategy
-
-| Branch | Purpose |
-|--------|---------|
-| `main` | Production-ready code |
-| `development` | Integration branch |
-| `feature/*` | New features |
-| `fix/*` | Bug fixes |
-| `hotfix/*` | Critical production fixes |
-
-## Deployment Process
-
-1. Create feature branch from `development`
-2. Implement changes
-3. Create PR to `development`
-4. CI runs automatically
-5. Code review and approval
-6. Merge to `development`
-7. Create PR from `development` to `main` for release
-
-## CD Pipeline (Future)
-
-Planned CD workflow:
-1. Trigger on merge to `main`
-2. Build and push Docker images
-3. Deploy to staging
-4. Run smoke tests
-5. Manual approval for production
-6. Deploy to production
+Last updated: March 30, 2026.

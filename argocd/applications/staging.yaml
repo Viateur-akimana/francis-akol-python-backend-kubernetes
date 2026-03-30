@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mlh-staging
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/franakol/francis-akol-python-backend-assessment.git
+    targetRevision: main # Or a specific staging branch
+    path: k8s # The folder containing your YAMLs
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: mlh-platform
+  syncPolicy:
+    automated:
+      prune: true # Automatically delete resources not in Git
+      selfHeal: true # Automatically fix cluster to match Git
+    syncOptions:
+      - CreateNamespace=true
