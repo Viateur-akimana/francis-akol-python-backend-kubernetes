@@ -265,3 +265,8 @@ output "node_role_name" {
   description = "IAM Role name for EKS nodes"
   value       = aws_iam_role.node_role.name
 }
+
+output "oidc_provider_arn" {
+  description = "OIDC Provider ARN for the cluster"
+  value       = aws_iam_openid_connect_provider.oidc[0].arn
+}

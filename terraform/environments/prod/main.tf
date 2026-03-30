@@ -141,3 +141,11 @@ module "karpenter" {
   node_iam_role_name     = module.compute.node_role_name
   private_subnets        = module.networking.private_subnets
 }
+
+module "obersability" {
+  source            = "../../modules/observability"
+  cluster_name     = module.compute.cluster_name
+  environment      = "production"
+  vpc_id           = module.networking.vpc_id
+  oidc_provider_arn = module.compute.oidc_provider_arn
+}
