@@ -127,16 +127,13 @@ def upgrade() -> None:
     )
 
     # Create full-text search index on course title and description
-    op.execute(
-        """
+    op.execute("""
         CREATE INDEX idx_courses_fulltext ON courses 
         USING gin(to_tsvector('english', title || ' ' || description))
-    """
-    )
+        """)
 
     # Create triggers for auto-update timestamps
-    op.execute(
-        """
+    op.execute("""
         CREATE OR REPLACE FUNCTION update_updated_at_column()
         RETURNS TRIGGER AS $$
         BEGIN
@@ -144,29 +141,22 @@ def upgrade() -> None:
             RETURN NEW;
         END;
         $$ language 'plpgsql';
-    """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_categories_updated_at BEFORE UPDATE ON categories
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_courses_updated_at BEFORE UPDATE ON courses
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
-    )
+        """)
 
-    op.execute(
-        """
+    op.execute("""
         CREATE TRIGGER update_course_contents_updated_at BEFORE UPDATE ON course_contents
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
-    )
+        """)
 
 
 def downgrade() -> None:
