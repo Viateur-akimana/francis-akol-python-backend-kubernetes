@@ -14,7 +14,7 @@ jobs:
       user-service: ${{ steps.filter.outputs.user_service }}
       course-service: ${{ steps.filter.outputs.course_service }}
       enrollment-service: ${{ steps.filter.outputs.enrollment_service }}
-      payment_service: ${{ steps.filter.outputs.payment_service }}
+      payment-service: ${{ steps.filter.outputs.payment_service }}
     steps:
       - uses: actions/checkout@v4
       - name: Detect Changes
@@ -101,22 +101,29 @@ jobs:
     needs: [detect-changes, lint-and-format]
     strategy:
       matrix:
-        service: [user-service, course-service, enrollment-service, payment-service]
-    if: |
-      (matrix.service == 'user-service' && needs.detect-changes.outputs.user-service == 'true') ||
-      (matrix.service == 'course-service' && needs.detect-changes.outputs.course-service == 'true') ||
-      (matrix.service == 'enrollment-service' && needs.detect-changes.outputs.enrollment-service == 'true') ||
-      (matrix.service == 'payment-service' && needs.detect-changes.outputs.payment-service == 'true')
+        include:
+          - service: user-service
+            changed: ${{ needs.detect-changes.outputs.user-service }}
+          - service: course-service
+            changed: ${{ needs.detect-changes.outputs.course-service }}
+          - service: enrollment-service
+            changed: ${{ needs.detect-changes.outputs.enrollment-service }}
+          - service: payment-service
+            changed: ${{ needs.detect-changes.outputs.payment-service }}
     steps:
       - uses: actions/checkout@v4
+        if: matrix.changed == 'true'
       - name: Set up Docker Buildx
+        if: matrix.changed == 'true'
         uses: docker/setup-buildx-action@v3
       - name: Run Hadolint
+        if: matrix.changed == 'true'
         uses: hadolint/hadolint-action@v3.1.0
         with:
           dockerfile: ./services/${{ matrix.service }}/Dockerfile
           ignore: DL3008,DL3013
       - name: Build ${{ matrix.service }}
+        if: matrix.changed == 'true'
         uses: docker/build-push-action@v5
         with:
           context: ./services/${{ matrix.service }}
@@ -125,6 +132,7 @@ jobs:
           load: true
           tags: mlh-${{ matrix.service }}:${{ github.sha }}
       - name: Run Trivy Scan
+        if: matrix.changed == 'true'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: 'mlh-${{ matrix.service }}:${{ github.sha }}'
@@ -160,7 +168,7 @@ jobs:
     name: API Contract Tests
     runs-on: ubuntu-latest
     needs: [build-docker-images]
-    if: always() && (needs.build-docker-images.result == 'success' || needs.build-docker-images.result == 'skipped')
+    if: always()
     steps:
       - uses: actions/checkout@v4
       - name: Start services with retry
