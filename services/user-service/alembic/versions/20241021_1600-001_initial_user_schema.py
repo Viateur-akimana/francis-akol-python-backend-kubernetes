@@ -90,21 +90,21 @@ def upgrade() -> None:
             RETURN NEW;
         END;
         $$ language 'plpgsql';
-    """
+        """
     )
 
     op.execute(
         """
         CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
+        """
     )
 
     op.execute(
         """
         CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON profiles
         FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-    """
+        """
     )
 
 
