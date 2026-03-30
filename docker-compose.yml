@@ -1,4 +1,4 @@
-version: '3.8'
+# Docker Compose configuration for MLH Platform
 
 services:
   # ============================================
@@ -74,7 +74,7 @@ services:
       - DEBUG=${DEBUG:-true}
       - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${USER_DB_NAME:-user_db}
       - REDIS_URL=redis://:${REDIS_PASSWORD:-mlh_redis_password}@redis:6379/0
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-ci_test_secret_key_32_chars_long}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - JWT_ACCESS_TOKEN_EXPIRE_MINUTES=${JWT_ACCESS_TOKEN_EXPIRE_MINUTES:-15}
     ports:
@@ -178,7 +178,7 @@ services:
       - USER_SERVICE_URL=${USER_SERVICE_URL:-http://user-service:8001}
       - COURSE_SERVICE_URL=${COURSE_SERVICE_URL:-http://course-service:8002}
       - ENROLLMENT_SERVICE_URL=${ENROLLMENT_SERVICE_URL:-http://enrollment-service:8003}
-      - PAYMENT_GATEWAY_API_KEY=${PAYMENT_GATEWAY_API_KEY}
+      - PAYMENT_GATEWAY_API_KEY=${PAYMENT_GATEWAY_API_KEY:-sk_test_ci_key}
     ports:
       - "8004:8004"
     volumes:
@@ -213,10 +213,10 @@ services:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-mlh_user}:${POSTGRES_PASSWORD:-mlh_secure_password}@postgres:5432/${ENROLLMENT_DB_NAME:-enrollment_db}
       - CELERY_BROKER_URL=${CELERY_BROKER_URL:-redis://:mlh_redis_password@redis:6379/1}
       - CELERY_RESULT_BACKEND=${CELERY_RESULT_BACKEND:-redis://:mlh_redis_password@redis:6379/2}
-      - SMTP_HOST=${SMTP_HOST}
-      - SMTP_PORT=${SMTP_PORT}
-      - SMTP_USER=${SMTP_USER}
-      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_HOST=${SMTP_HOST:-localhost}
+      - SMTP_PORT=${SMTP_PORT:-1025}
+      - SMTP_USER=${SMTP_USER:-test_user}
+      - SMTP_PASSWORD=${SMTP_PASSWORD:-test_pass}
     volumes:
       - ./services/enrollment-service:/app
     depends_on:

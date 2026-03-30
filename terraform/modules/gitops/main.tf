@@ -16,6 +16,7 @@ variable "environment" {
 # RESOURCES
 # ---------------------------------------------------------------------------------------------------------------------
 
+# ArgoCD Helm Release
 resource "helm_release" "argocd" {
   name             = "argocd"
   repository       = "https://argoproj.github.io/argo-helm"
